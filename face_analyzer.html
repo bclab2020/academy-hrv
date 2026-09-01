@@ -194,7 +194,7 @@
 
         .countdown-hud-badge.badge-alert {
             border-color: #ef4444 !important;
-            background: rgba(185, 28, 28, 0.9) !important;
+            background: rgba(185, 28, 28, 0.92) !important;
         }
 
         .countdown-num {
@@ -438,7 +438,7 @@
                     <span>⚡ rPPG FaceMesh v2.4</span>
                 </div>
 
-                <!-- High-Visibility Motion & Shake Warning Banner -->
+                <!-- High-Visibility Motion & Shake Warning Banner (Active only during measurement) -->
                 <div class="hud-warning-banner" id="hudWarningOverlay" style="display: none;">
                     <span style="font-size: 16px;">⚠️</span>
                     <span id="hudWarningText">手ブレ・体動検知: スマートフォンまたは頭を固定してください</span>
@@ -474,12 +474,9 @@
                     <button class="btn btn-secondary" id="simScanBtn" onclick="runSimulatedScan()" style="border-radius: 9999px; font-size: 11px; padding: 10px 14px;">
                         🧪 デモ計測
                     </button>
-                    <button class="btn btn-secondary" id="testShakeBtn" onclick="triggerTestShakeAlert()" style="border-radius: 9999px; font-size: 11px; padding: 10px 14px; background: #fee2e2; color: #dc2626; border-color: #fca5a5;">
-                        🚨 ブレ検知テスト
-                    </button>
                 </div>
                 <div id="statusBar" style="font-size: 11.5px; color: var(--text-secondary); text-align: center; margin-top: 10px;">
-                    「カメラ起動」を押すとAIフェイスメッシュと動体ブレ検知が起動します。
+                    「カメラ起動」を押してお顔を合わせ、「30秒スキャン開始」を押してください。
                 </div>
             </div>
 
@@ -753,10 +750,10 @@
         let isMeasuring = false;
         let faceDetected = false;
 
-        // Ultra-Sensitive Motion & Shake Tracking Variables
+        // Motion & Shake Tracking Variables (ACTIVE ONLY DURING MEASUREMENT)
         let prevPts = null;
-        let warningHoldUntil = 0; // Timestamp to keep warning banner visible for at least 1.8s
-        let currentWarningType = ""; // "shake", "angle", "missing", "test"
+        let warningHoldUntil = 0;
+        let currentWarningType = "";
 
         // rPPG Signal Data
         let ppgBuffer = [];
@@ -779,9 +776,9 @@
             ppgCtx.clearRect(0, 0, ppgCanvas.width, ppgCanvas.height);
             ppgCtx.lineWidth = 2;
             
-            const isAlertActive = Date.now() < warningHoldUntil;
+            const isAlertActive = isMeasuring && (Date.now() < warningHoldUntil);
 
-            // Turn waveform red/orange on movement warning
+            // Turn waveform red on movement warning during measurement
             if (isAlertActive) {
                 ppgCtx.strokeStyle = '#ef4444';
             } else if (isMeasuring) {
@@ -826,13 +823,10 @@
             };
         }
 
-        // Manual Shake Alert Test Button (Allows user to immediately verify visual warning)
-        window.triggerTestShakeAlert = function() {
-            setWarningAlert("📱 手ブレ・体動検知: スマートフォンまたは頭を固定してください", 2500);
-        };
-
-        // Core Warning Display Trigger with Hold-Timer (Prevents flickering)
+        // Core Warning Display Trigger (Only triggers when isMeasuring is true)
         function setWarningAlert(message, durationMs = 1800) {
+            if (!isMeasuring) return;
+
             warningHoldUntil = Date.now() + durationMs;
             currentWarningType = message;
 
@@ -845,14 +839,14 @@
                 signalQuality.style.color = "#ef4444";
             }
 
-            if (isMeasuring && countdownBadge && countdownStatusText) {
+            if (countdownBadge && countdownStatusText) {
                 countdownBadge.classList.add('badge-alert');
                 countdownStatusText.innerHTML = `<span style="color:#ffffff; font-weight:800;">⚠️ 動かないでください（体動検知）</span>`;
             }
         }
 
         function checkWarningExpiration() {
-            if (Date.now() >= warningHoldUntil) {
+            if (!isMeasuring || Date.now() >= warningHoldUntil) {
                 hudWarningOverlay.style.display = 'none';
                 cameraCard.classList.remove('alert-mode');
 
@@ -887,7 +881,7 @@
             }
 
             try {
-                statusBar.innerText = 'カメラとAI FaceMesh・動体検知を初期化しています...';
+                statusBar.innerText = 'カメラとAI FaceMeshを初期化しています...';
                 const stream = await navigator.mediaDevices.getUserMedia({
                     video: { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: 'user' }
                 });
@@ -926,15 +920,23 @@
                 startCamBtn.innerText = '⏹ カメラ停止';
                 startScanBtn.disabled = false;
                 hudStatusText.innerText = '顔を検出中...';
-                statusBar.innerText = 'お顔が検出されました。「30秒スキャン開始」を押してください。';
+                statusBar.innerText = 'お顔が検出されました。「30秒スキャン開始」を押して測定を始めてください。';
             } catch (err) {
                 console.error("Camera access failed:", err);
                 statusBar.innerText = 'カメラの起動に失敗しました。右下の「デモ計測」をお試しください。';
             }
         }
 
-        // Ultra-Sensitive Motion, Shake & Pose Stability Engine
+        // Motion & Shake Detection Engine (Active ONLY during measurement)
         function processMotionAndStability(landmarks) {
+            // If NOT measuring, reset alerts completely
+            if (!isMeasuring) {
+                prevPts = null;
+                warningHoldUntil = 0;
+                checkWarningExpiration();
+                return;
+            }
+
             const forehead = landmarks[10];
             const nose = landmarks[1];
             const leftEye = landmarks[33];
@@ -968,7 +970,7 @@
                 const moveNose = Math.sqrt(dnX * dnX + dnY * dnY);
                 const avgMove = (moveForehead + moveNose) / 2;
 
-                // Threshold: If movement per frame exceeds 1.6px, trigger shake alert immediately!
+                // Threshold: If movement per frame exceeds 1.6px during scan
                 if (avgMove > 1.6) {
                     setWarningAlert("📱 手ブレ・体動検知: スマートフォンまたは頭を固定してください", 1800);
                 }
@@ -982,7 +984,6 @@
                 const distR = Math.abs(rightCheek.x - nose.x);
                 const ratio = distL / (distR + 0.0001);
 
-                // If face turned sideways by more than ~15 degrees
                 if (ratio < 0.55 || ratio > 1.85) {
                     setWarningAlert("📐 顔の向き検知: カメラの正面を向いてください", 1800);
                 }
@@ -1016,11 +1017,11 @@
         // Draw Full MediaPipe Face Mesh & Sleek Cybernetic UI
         function drawSleekFaceMesh(landmarks) {
             const isScan = isMeasuring;
-            const isAlert = Date.now() < warningHoldUntil;
+            const isAlert = isMeasuring && (Date.now() < warningHoldUntil);
 
             // 1. Draw 468 landmark dots
             if (isAlert) {
-                ctx.fillStyle = "rgba(239, 68, 68, 0.9)"; // Red on shake
+                ctx.fillStyle = "rgba(239, 68, 68, 0.9)"; // Red on shake during scan
             } else {
                 ctx.fillStyle = isScan ? "rgba(52, 199, 89, 0.75)" : "rgba(56, 189, 248, 0.55)";
             }
@@ -1119,17 +1120,23 @@
             if (!results.multiFaceLandmarks || results.multiFaceLandmarks.length === 0) {
                 faceDetected = false;
                 hudStatusText.innerText = '顔未検出';
-                setWarningAlert("👤 顔未検出: カメラの中央にお顔を合わせてください", 1800);
+                
+                if (isMeasuring) {
+                    setWarningAlert("👤 顔未検出: カメラの中央にお顔を合わせてください", 1800);
+                } else {
+                    hudWarningOverlay.style.display = 'none';
+                    cameraCard.classList.remove('alert-mode');
+                }
                 return;
             }
 
             faceDetected = true;
             const landmarks = results.multiFaceLandmarks[0];
 
-            // Run Ultra-Sensitive Motion & Shake Detection
+            // Run Motion & Shake Detection (Only active when measuring)
             processMotionAndStability(landmarks);
 
-            const isAlert = Date.now() < warningHoldUntil;
+            const isAlert = isMeasuring && (Date.now() < warningHoldUntil);
             hudStatusText.innerText = isMeasuring ? (isAlert ? '⚠️ 体動検知中' : 'AIスキャン測定中...') : '顔認識中 (準備完了)';
 
             // Render rich sleek FaceMesh
@@ -1188,6 +1195,8 @@
             startScanBtn.disabled = false;
             hudWarningOverlay.style.display = 'none';
             cameraCard.classList.remove('alert-mode');
+            prevPts = null;
+            warningHoldUntil = 0;
 
             // Generate realistic youth RMSSD & HR & Evidence Parameters
             const mockRmssd = Math.floor(48 + Math.random() * 20); // 48-68 ms
