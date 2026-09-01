@@ -530,41 +530,43 @@
                     </div>
                 </div>
 
-                <!-- Detailed Scientific Evidence Parameters -->
+                <!-- Detailed Scientific Evidence Parameters with POPUP Trigger -->
                 <div style="border-top: 1px dashed var(--border-color); padding-top: 12px; margin-top: 12px;">
                     <div style="font-size: 12px; font-weight: 700; color: var(--text-primary); margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between;">
                         <span>🔬 測定根拠・生体パラメータ詳細</span>
-                        <span style="font-size: 10px; color: var(--accent-blue); font-weight: 600;">国際自律神経学会基準</span>
+                        <button type="button" class="btn btn-secondary" onclick="openLogicModal()" style="padding: 4px 10px; font-size: 10px; border-radius: 9999px; border: 1px solid var(--accent-blue); color: var(--accent-blue); background: #f0f9ff; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+                            <span>ℹ️ 算出ロジック解説 (POPUP)</span>
+                        </button>
                     </div>
 
                     <div class="evidence-detail-grid">
-                        <div class="evidence-item">
+                        <div class="evidence-item" onclick="openLogicModal('sdnn')" style="cursor: pointer; transition: all 0.15s ease;" onmouseover="this.style.borderColor='var(--accent-indigo)'" onmouseout="this.style.borderColor='var(--border-color)'">
                             <div class="evidence-item-title">
                                 <span>SDNN (全体適応力)</span>
                                 <span id="resSdnn" style="color: var(--accent-indigo); font-weight: 800;">-- ms</span>
                             </div>
-                            <div class="evidence-item-desc">拍動間隔の標準偏差。自律神経全体の環境適応力とストレス耐性を反映。</div>
+                            <div class="evidence-item-desc">拍動間隔の標準偏差。自律神経全体の環境適応力とストレス耐性を反映。 <span style="color:var(--accent-blue); font-weight:700;">[詳細]</span></div>
                         </div>
-                        <div class="evidence-item">
+                        <div class="evidence-item" onclick="openLogicModal('lfhf')" style="cursor: pointer; transition: all 0.15s ease;" onmouseover="this.style.borderColor='var(--accent-teal)'" onmouseout="this.style.borderColor='var(--border-color)'">
                             <div class="evidence-item-title">
                                 <span>LF / HF 比 (自律神経比)</span>
                                 <span id="resLfHf" style="color: var(--accent-teal); font-weight: 800;">--</span>
                             </div>
-                            <div class="evidence-item-desc">交感神経(LF)と副交感神経(HF)のパワー比率。1.0〜2.0が理想バランス。</div>
+                            <div class="evidence-item-desc">交感神経(LF)と副交感神経(HF)のパワー比率。1.0〜2.0が理想バランス。 <span style="color:var(--accent-blue); font-weight:700;">[詳細]</span></div>
                         </div>
-                        <div class="evidence-item">
+                        <div class="evidence-item" onclick="openLogicModal('age')" style="cursor: pointer; transition: all 0.15s ease;" onmouseover="this.style.borderColor='var(--accent-purple)'" onmouseout="this.style.borderColor='var(--border-color)'">
                             <div class="evidence-item-title">
                                 <span>自律神経機能年齢</span>
                                 <span id="resAutonomicAge" style="color: var(--accent-purple); font-weight: 800;">-- 歳相当</span>
                             </div>
-                            <div class="evidence-item-desc">血管弾力性と脈波間隔の柔軟性から算定した自律神経トーン年齢。</div>
+                            <div class="evidence-item-desc">血管弾力性と脈波間隔の柔軟性から算定した自律神経トーン年齢。 <span style="color:var(--accent-blue); font-weight:700;">[詳細]</span></div>
                         </div>
-                        <div class="evidence-item">
+                        <div class="evidence-item" onclick="openLogicModal('od')" style="cursor: pointer; transition: all 0.15s ease;" onmouseover="this.style.borderColor='var(--accent-green)'" onmouseout="this.style.borderColor='var(--border-color)'">
                             <div class="evidence-item-title">
                                 <span>起立性覚醒スイッチ</span>
                                 <span id="resOdScore" style="color: var(--accent-green); font-weight: 800;">-- %</span>
                             </div>
-                            <div class="evidence-item-desc">末梢血流への切り替え度。起立性調節障害(OD)の早期予防指標。</div>
+                            <div class="evidence-item-desc">末梢血流への切り替え度。起立性調節障害(OD)の早期予防指標。 <span style="color:var(--accent-blue); font-weight:700;">[詳細]</span></div>
                         </div>
                     </div>
                 </div>
@@ -713,14 +715,136 @@
                 <span id="eyeGameTimer" style="font-size: 12px; font-weight: 700; color: var(--text-primary);">残り: 30秒</span>
             </div>
 
+    <!-- Logic Explanation Modal (POPUP) -->
+    <div class="modal-overlay" id="logicModal">
+        <div class="modal-content" style="max-width: 680px; max-height: 85vh; overflow-y: auto; text-align: left;">
+            <button class="modal-close" onclick="closeLogicModal()">&times;</button>
+            
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+                <span class="badge badge-blue">国際自律神経学会基準 (ESC/NASPE)</span>
+                <span class="badge badge-indigo">久保 肇 医師 監修</span>
+            </div>
+            
+            <h3 style="font-size: 20px; font-weight: 800; color: var(--text-primary); margin-bottom: 6px;">
+                🔬 生体パラメータ算出ロジック & 医学的根拠
+            </h3>
+            <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 16px;">
+                本システムがカメラ映像（rPPG非接触光学センシング）から各指標をどのように測定・算出しているかの科学的アルゴリズム解説です。
+            </p>
+
+            <!-- Flow Diagram Box -->
+            <div style="background: #f1f5f9; border: 1px solid var(--border-color); border-radius: 12px; padding: 14px; margin-bottom: 18px;">
+                <div style="font-size: 11px; font-weight: 800; color: var(--accent-blue); letter-spacing: 0.5px; margin-bottom: 8px;">
+                    ⚡ リアルタイム生体計測フロー（カメラ ➔ 数値化）
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; font-size: 11px;">
+                    <div style="background:#fff; padding:8px 10px; border-radius:8px; border-left:3px solid var(--accent-blue);">
+                        <strong>① ROI追跡</strong><br>額・両頬の毛細血管エリアをFaceMeshでトラッキング
+                    </div>
+                    <div style="background:#fff; padding:8px 10px; border-radius:8px; border-left:3px solid var(--accent-teal);">
+                        <strong>② rPPG脈波抽出</strong><br>Green輝度の微小変動からヘモグロビン吸光度波形を復元
+                    </div>
+                    <div style="background:#fff; padding:8px 10px; border-radius:8px; border-left:3px solid var(--accent-indigo);">
+                        <strong>③ RR間隔抽出</strong><br>拍動の山と山の時間差（ms）をミリ秒単位で時系列化
+                    </div>
+                    <div style="background:#fff; padding:8px 10px; border-radius:8px; border-left:3px solid var(--accent-purple);">
+                        <strong>④ 指数・処方箋</strong><br>統計・周波数FFT・年代モデルから総合判定
+                    </div>
+                </div>
+            </div>
+
+            <!-- Detailed Parameter Breakdown -->
+            <div style="display: flex; flex-direction: column; gap: 14px;">
+                
+                <!-- SDNN -->
+                <div id="logic-sdnn" style="background: #ffffff; border: 1px solid var(--border-color); border-radius: 12px; padding: 14px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                        <span style="font-size: 14px; font-weight: 800; color: var(--accent-indigo);">1. SDNN（拍動間隔の標準偏差）</span>
+                        <span class="badge badge-indigo">統計学的指標</span>
+                    </div>
+                    <div style="font-size: 12px; color: var(--text-secondary); line-height: 1.6;">
+                        <strong>【算出方法】</strong> 30秒間に計測された全拍動（NN/RR間隔）の統計的標準偏差を計算：<br>
+                        <code style="background:#f8fafc; padding:2px 6px; border-radius:4px; font-family:monospace;">SDNN = √( 1/(N-1) × Σ(RR_i - 平均RR)^2 )</code><br>
+                        <strong>【医学的意味】</strong> 自律神経系（交感神経＋副交感神経）全体の総合的な活動量・環境適応力・ストレス耐性を反映します。50ms以上が良好な柔軟性の目安です。
+                    </div>
+                </div>
+
+                <!-- LF / HF -->
+                <div id="logic-lfhf" style="background: #ffffff; border: 1px solid var(--border-color); border-radius: 12px; padding: 14px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                        <span style="font-size: 14px; font-weight: 800; color: var(--accent-teal);">2. LF / HF 比（自律神経バランス比）</span>
+                        <span class="badge badge-teal">周波数解析 (FFT)</span>
+                    </div>
+                    <div style="font-size: 12px; color: var(--text-secondary); line-height: 1.6;">
+                        <strong>【算出方法】</strong> RR間隔データを高速フーリエ変換（FFT）し、周波数成分を分離：<br>
+                        ・<strong>LF (0.04〜0.15Hz):</strong> 交感神経＋副交感神経の複合活動（緊張・活動）<br>
+                        ・<strong>HF (0.15〜0.40Hz):</strong> 呼吸連動の純粋な副交感神経活動（リラックス・休息）<br>
+                        <strong>【医学的意味】</strong> <code style="background:#f8fafc; padding:2px 6px; border-radius:4px; font-family:monospace;">LF/HF 比</code> が <strong>1.0〜2.0</strong> の範囲が理想バランス。2.5以上は過緊張・プレッシャー、0.8未満は深いリラックス状態を示します。
+                    </div>
+                </div>
+
+                <!-- Autonomic Age -->
+                <div id="logic-age" style="background: #ffffff; border: 1px solid var(--border-color); border-radius: 12px; padding: 14px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                        <span style="font-size: 14px; font-weight: 800; color: var(--accent-purple);">3. 自律神経機能年齢</span>
+                        <span class="badge badge-purple">年代別HRV分布モデル</span>
+                    </div>
+                    <div style="font-size: 12px; color: var(--text-secondary); line-height: 1.6;">
+                        <strong>【算出方法】</strong> 加齢とともに心拍変動（RMSSD/SDNN）が自然低下する国際的疫学データと、脈波の立ち上がり速度（血管のしなやかさ）を照合して統計的に推定。<br>
+                        <strong>【医学的意味】</strong> 実年齢に対して自律神経の弾力性と若々しさがどれくらい保たれているかを直感的に把握できます。
+                    </div>
+                </div>
+
+                <!-- Orthostatic Dysregulation Score -->
+                <div id="logic-od" style="background: #ffffff; border: 1px solid var(--border-color); border-radius: 12px; padding: 14px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                        <span style="font-size: 14px; font-weight: 800; color: var(--accent-green);">4. 起立性覚醒スイッチ（OD早期予防指標）</span>
+                        <span class="badge badge-green">ユース特化指標</span>
+                    </div>
+                    <div style="font-size: 12px; color: var(--text-secondary); line-height: 1.6;">
+                        <strong>【算出方法】</strong> 心拍数（BPM）とRMSSD（副交感神経トーン）、および顔面末梢毛細血管の脈波振幅（血管収縮度）の連動比率から算出。<br>
+                        <strong>【医学的意味】</strong> 青年期に多い「起立性調節障害（朝起きられない・立ちくらみ・頭痛）」の兆候を捉え、スムーズに活動モード（血流維持）へ切り替えられているかをパーセンテージで示します。
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Privacy note -->
+            <div style="margin-top: 16px; padding: 10px 14px; background: #f8fafc; border-radius: 8px; font-size: 11px; color: var(--text-muted); line-height: 1.5;">
+                🛡️ <strong>エッジ処理の保証:</strong> 上記の数学的・生理学的解析処理はすべてお使いのブラウザ内部（JavaScript）でのみ完結しており、生体データや顔映像が外部サーバーへ送信されることは一切ありません。
+            </div>
+
             <div style="margin-top: 18px; text-align: center;">
-                <button class="btn btn-secondary" onclick="closeEyeGameModal()" style="border-radius: 9999px; padding: 8px 24px;">終了</button>
+                <button class="btn btn-secondary" onclick="closeLogicModal()" style="border-radius: 9999px; padding: 8px 32px;">閉じる</button>
             </div>
         </div>
     </div>
 
     <!-- Script Logic -->
     <script>
+        // Logic Modal Functions
+        function openLogicModal(targetParam) {
+            const modal = document.getElementById('logicModal');
+            modal.classList.add('active');
+            if (targetParam) {
+                const targetEl = document.getElementById(`logic-${targetParam}`);
+                if (targetEl) {
+                    targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    targetEl.style.boxShadow = '0 0 15px rgba(2, 132, 199, 0.3)';
+                    targetEl.style.borderColor = 'var(--accent-blue)';
+                    setTimeout(() => {
+                        targetEl.style.boxShadow = '';
+                        targetEl.style.borderColor = 'var(--border-color)';
+                    }, 2000);
+                }
+            }
+        }
+
+        function closeLogicModal() {
+            const modal = document.getElementById('logicModal');
+            modal.classList.remove('active');
+        }
+
         // Global State & Elements
         const video = document.getElementById('webcamVideo');
         const canvas = document.getElementById('outputCanvas');
