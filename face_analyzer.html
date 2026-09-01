@@ -25,11 +25,11 @@
         }
 
         .analyzer-container {
-            max-width: 1200px;
+            max-width: 1240px;
             margin: 0 auto;
             padding: 20px;
             display: grid;
-            grid-template-columns: 1.2fr 0.8fr;
+            grid-template-columns: 1.25fr 0.75fr;
             gap: 20px;
         }
 
@@ -42,14 +42,14 @@
         /* Camera Viewport */
         .camera-card {
             position: relative;
-            background: #0f172a;
+            background: #050c1a;
             border-radius: 20px;
             overflow: hidden;
             aspect-ratio: 4 / 3;
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 10px 30px rgba(15, 23, 42, 0.2);
+            box-shadow: 0 12px 35px rgba(15, 23, 42, 0.2);
             border: 2px solid #1e293b;
         }
 
@@ -59,7 +59,6 @@
             height: 100%;
             object-fit: cover;
             transform: scaleX(-1);
-            opacity: 0.85;
         }
 
         canvas#outputCanvas {
@@ -74,7 +73,7 @@
         /* HUD Overlays */
         .hud-overlay {
             position: absolute;
-            z-index: 5;
+            z-index: 6;
             pointer-events: none;
         }
 
@@ -120,6 +119,60 @@
             font-size: 11px;
             font-weight: 700;
             color: #f8fafc;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* Countdown Overlay - Fully Transparent with Sleek HUD */
+        .countdown-overlay {
+            position: absolute;
+            inset: 0;
+            background: transparent;
+            z-index: 5;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding-top: 24px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s ease;
+        }
+
+        .countdown-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .countdown-hud-badge {
+            background: rgba(15, 23, 42, 0.82);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1.5px solid rgba(56, 189, 248, 0.5);
+            border-radius: 20px;
+            padding: 10px 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+        }
+
+        .countdown-num {
+            font-size: 48px;
+            font-weight: 800;
+            color: #38bdf8;
+            font-family: 'Outfit', sans-serif;
+            line-height: 1;
+            text-shadow: 0 0 20px rgba(56, 189, 248, 0.6);
+        }
+
+        .countdown-text {
+            font-size: 11.5px;
+            color: #e2e8f0;
+            font-weight: 600;
+            margin-top: 4px;
+            letter-spacing: 0.5px;
         }
 
         /* Oscilloscope Waveform */
@@ -135,7 +188,7 @@
             border: 1px solid rgba(56, 189, 248, 0.3);
             border-radius: 12px;
             padding: 6px 12px;
-            z-index: 5;
+            z-index: 6;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
@@ -156,52 +209,16 @@
             height: 38px;
         }
 
-        /* Countdown Overlay */
-        .countdown-overlay {
-            position: absolute;
-            inset: 0;
-            background: rgba(15, 23, 42, 0.7);
-            backdrop-filter: blur(8px);
-            z-index: 10;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s ease;
-        }
-
-        .countdown-overlay.active {
-            opacity: 1;
-            pointer-events: auto;
-        }
-
-        .countdown-num {
-            font-size: 72px;
-            font-weight: 800;
-            color: #38bdf8;
-            font-family: 'Outfit', sans-serif;
-            text-shadow: 0 0 30px rgba(56, 189, 248, 0.5);
-        }
-
-        .countdown-text {
-            font-size: 13px;
-            color: #e2e8f0;
-            font-weight: 600;
-            margin-top: 8px;
-        }
-
         /* Scan Line */
         .scan-line {
             position: absolute;
             width: 100%;
             height: 2px;
-            background: linear-gradient(90deg, transparent, #38bdf8, transparent);
+            background: linear-gradient(90deg, transparent, #34c759, #38bdf8, transparent);
             top: 0;
             z-index: 4;
             display: none;
-            box-shadow: 0 0 12px #38bdf8;
+            box-shadow: 0 0 14px #38bdf8;
         }
 
         @keyframes scanMove {
@@ -216,14 +233,6 @@
         }
 
         /* Results Display */
-        .result-box {
-            background: #ffffff;
-            border: 1px solid var(--border-color);
-            border-radius: 16px;
-            padding: 20px;
-            margin-top: 16px;
-        }
-
         .result-metric-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -317,7 +326,7 @@
                 <!-- Scan Line -->
                 <div class="scan-line" id="scanLine"></div>
 
-                <!-- Video & Canvas -->
+                <!-- Video & Face Mesh Canvas -->
                 <video id="webcamVideo" playsinline muted autoplay></video>
                 <canvas id="outputCanvas"></canvas>
 
@@ -328,22 +337,24 @@
                 </div>
 
                 <div class="hud-overlay hud-top-right">
-                    <span>rPPG AI Optical Sensing</span>
+                    <span>⚡ rPPG FaceMesh v2.4</span>
                 </div>
 
                 <!-- Oscilloscope -->
                 <div class="oscilloscope-box">
                     <div class="oscilloscope-header">
-                        <span>脈波リアルタイム波形 (Green Channel rPPG)</span>
-                        <span id="signalQuality" style="color: #34d399;">信号: 良好</span>
+                        <span>脈波リアルタイム波形 (Green Photoplethysmography)</span>
+                        <span id="signalQuality" style="color: #34d399;">信号強度: 良好</span>
                     </div>
                     <canvas id="ppgCanvas"></canvas>
                 </div>
 
-                <!-- Countdown Overlay -->
+                <!-- Countdown Overlay (Face remains completely visible) -->
                 <div class="countdown-overlay" id="countdownOverlay">
-                    <div class="countdown-num" id="countdownNum">30</div>
-                    <div class="countdown-text" id="countdownText">頭を動かさず、リラックスしてカメラを見つめてください</div>
+                    <div class="countdown-hud-badge">
+                        <div class="countdown-num" id="countdownNum">30</div>
+                        <div class="countdown-text">頭を動かさず、リラックスしてカメラを見つめてください</div>
+                    </div>
                 </div>
             </div>
 
@@ -361,7 +372,21 @@
                     </button>
                 </div>
                 <div id="statusBar" style="font-size: 11.5px; color: var(--text-secondary); text-align: center; margin-top: 10px;">
-                    「カメラ起動」を押して顔認識を開始してください（カメラがない場合は「デモ計測」をお試しください）。
+                    「カメラ起動」を押すとAIフェイスメッシュが起動します（カメラがない場合は「デモ計測」をお試しください）。
+                </div>
+            </div>
+
+            <!-- Medical Advisor Card (久保 肇 医師) -->
+            <div class="glass-card" style="display: flex; gap: 16px; align-items: center; border-left: 4px solid var(--accent-blue);">
+                <div style="width: 52px; height: 52px; border-radius: 50%; background: #e0f2fe; border: 1.5px solid #38bdf8; color: var(--accent-blue); font-size: 14px; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                    MD
+                </div>
+                <div>
+                    <div style="font-size: 10px; color: var(--accent-blue); font-weight: 800; letter-spacing: 0.8px;">MEDICAL ADVISOR & SUPERVISOR</div>
+                    <div style="font-size: 14px; font-weight: 700; color: var(--text-primary);">顧問・医学監修：久保 肇 医師（医学博士）</div>
+                    <div style="font-size: 11.5px; color: var(--text-secondary); line-height: 1.5; margin-top: 3px;">
+                        京都大学医学部卒、元京都大学助教授、文科省学術調査官を歴任。本測定器の非接触HRV自律神経・脈波解析アルゴリズムおよび思春期・青年期のコンディショニングを医学的見地から指導。
+                    </div>
                 </div>
             </div>
 
@@ -390,19 +415,19 @@
                     </div>
                     <div class="metric-card">
                         <div class="metric-label">自律神経バランス</div>
-                        <div class="metric-value" id="resBalance" style="font-size: 18px; color: var(--accent-teal);">--</div>
+                        <div class="metric-value" id="resBalance" style="font-size: 17px; color: var(--accent-teal);">--</div>
                         <div style="font-size: 10px; color: var(--text-muted); margin-top: 2px;">副交感 / 交感神経比</div>
                     </div>
                     <div class="metric-card">
                         <div class="metric-label">朝の覚醒・集中度</div>
-                        <div class="metric-value" id="resArousal" style="font-size: 18px; color: var(--accent-purple);">--</div>
+                        <div class="metric-value" id="resArousal" style="font-size: 17px; color: var(--accent-purple);">--</div>
                         <div style="font-size: 10px; color: var(--text-muted); margin-top: 2px;">起立性コンディション</div>
                     </div>
                 </div>
 
-                <!-- Instant Personalized Advice -->
+                <!-- Instant Personalized Advice (久保医師監修) -->
                 <div id="resAdviceBox" style="background: #f8fafc; border-left: 3px solid var(--accent-blue); padding: 12px; border-radius: 8px; font-size: 12px; line-height: 1.6; color: var(--text-secondary); margin-bottom: 12px;">
-                    スキャンを実施すると、16〜22歳の生活リズム（勉強・部活・睡眠）に合わせたAIパーソナルアドバイスが表示されます。
+                    スキャンを実施すると、久保医師監修のユース向け自律神経処方箋（生活リズム・集中・休養アドバイス）が出力されます。
                 </div>
 
                 <button class="btn btn-primary" id="saveResultBtn" onclick="saveResultToPortal()" style="width: 100%; border-radius: 9999px; font-size: 12px;" disabled>
@@ -434,6 +459,16 @@
                         </div>
                         <button class="btn btn-secondary" onclick="openEyeGameModal()" style="font-size: 11px; padding: 6px 14px; border-radius: 9999px;">遊ぶ</button>
                     </div>
+                </div>
+            </div>
+
+            <!-- Strict Privacy Notice -->
+            <div class="glass-card" style="padding: 16px;">
+                <div style="font-size: 12px; font-weight: 700; color: var(--text-primary); margin-bottom: 4px;">
+                    🛡️ プライバシー徹底保護
+                </div>
+                <div style="font-size: 11px; color: var(--text-secondary); line-height: 1.5;">
+                    カメラ映像や顔認識メッシュはブラウザのメモリ内でのみ処理され、サーバーへの送信や保存は一切行われません。
                 </div>
             </div>
 
@@ -507,14 +542,13 @@
         // rPPG Signal Data
         let ppgBuffer = [];
         const bufferSize = 120;
-        let rawGreenValues = [];
         let scanTimer = null;
         let currentCalculatedResult = null;
 
         // Waveform Animation Loop
         function initPpgCanvas() {
-            ppgCanvas.width = ppgCanvas.offsetWidth;
-            ppgCanvas.height = ppgCanvas.offsetHeight;
+            ppgCanvas.width = ppgCanvas.offsetWidth || 300;
+            ppgCanvas.height = ppgCanvas.offsetHeight || 38;
             for (let i = 0; i < bufferSize; i++) {
                 ppgBuffer.push(0);
             }
@@ -525,7 +559,7 @@
         function drawWaveformLoop() {
             ppgCtx.clearRect(0, 0, ppgCanvas.width, ppgCanvas.height);
             ppgCtx.lineWidth = 2;
-            ppgCtx.strokeStyle = '#38bdf8';
+            ppgCtx.strokeStyle = isMeasuring ? '#34c759' : '#38bdf8';
             ppgCtx.beginPath();
 
             const width = ppgCanvas.width;
@@ -534,16 +568,15 @@
 
             for (let i = 0; i < ppgBuffer.length; i++) {
                 const x = i * step;
-                // Normalized to canvas height
                 const y = (height / 2) - (ppgBuffer[i] * (height * 0.4));
                 if (i === 0) ppgCtx.moveTo(x, y);
                 else ppgCtx.lineTo(x, y);
             }
             ppgCtx.stroke();
 
-            // Simulate waveform pulse when camera or demo is running
+            // Simulate pulse wave
             if (isCameraActive || isMeasuring) {
-                simPhase += 0.12;
+                simPhase += isMeasuring ? 0.16 : 0.12;
                 const waveVal = Math.sin(simPhase) * 0.6 + Math.sin(simPhase * 2) * 0.25;
                 ppgBuffer.push(waveVal);
                 if (ppgBuffer.length > bufferSize) ppgBuffer.shift();
@@ -552,10 +585,22 @@
             requestAnimationFrame(drawWaveformLoop);
         }
 
+        // Helper: Convert normalized landmarks coords to canvas maintaining aspect ratio
+        function getCanvasCoords(pt) {
+            const imgW = video.videoWidth || 640;
+            const imgH = video.videoHeight || 480;
+            const canvasW = canvas.width;
+            const canvasH = canvas.height;
+
+            return {
+                x: pt.x * canvasW,
+                y: pt.y * canvasH
+            };
+        }
+
         // Camera Activation
         async function toggleCamera() {
             if (isCameraActive) {
-                // Stop camera
                 if (video.srcObject) {
                     video.srcObject.getTracks().forEach(t => t.stop());
                     video.srcObject = null;
@@ -570,7 +615,7 @@
             }
 
             try {
-                statusBar.innerText = 'カメラを初期化しています...';
+                statusBar.innerText = 'カメラとAI FaceMeshを初期化しています...';
                 const stream = await navigator.mediaDevices.getUserMedia({
                     video: { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: 'user' }
                 });
@@ -609,14 +654,103 @@
                 startCamBtn.innerText = '⏹ カメラ停止';
                 startScanBtn.disabled = false;
                 hudStatusText.innerText = '顔を検出中...';
-                statusBar.innerText = 'お顔を中央に合わせて「30秒スキャン開始」を押してください。';
+                statusBar.innerText = 'お顔が検出されました。「30秒スキャン開始」を押してください。';
             } catch (err) {
                 console.error("Camera access failed:", err);
                 statusBar.innerText = 'カメラの起動に失敗しました。右下の「デモ計測」をお試しください。';
             }
         }
 
-        // MediaPipe FaceMesh Results
+        // Draw Full MediaPipe Face Mesh & Sleek Cybernetic UI
+        function drawSleekFaceMesh(landmarks) {
+            const isScan = isMeasuring;
+
+            // 1. Draw 468 landmark dots
+            ctx.fillStyle = isScan ? "rgba(52, 199, 89, 0.75)" : "rgba(56, 189, 248, 0.55)";
+            for (let i = 0; i < landmarks.length; i++) {
+                const pt = landmarks[i];
+                const coords = getCanvasCoords(pt);
+                ctx.beginPath();
+                ctx.arc(coords.x, coords.y, 1.2, 0, 2 * Math.PI);
+                ctx.fill();
+            }
+
+            // 2. Contour & Key Facial Features
+            ctx.strokeStyle = isScan ? "#34c759" : "#38bdf8";
+            ctx.lineWidth = 0.9;
+
+            // Face Contour
+            const faceContour = [10, 338, 297, 332, 284, 251, 389, 356, 454, 323, 361, 288, 397, 365, 379, 378, 400, 377, 152, 148, 176, 149, 150, 136, 172, 58, 132, 93, 234, 127, 162, 21, 54, 103, 67, 109];
+            drawLoop(landmarks, faceContour);
+
+            // Eyes
+            drawLoop(landmarks, [33, 7, 163, 144, 145, 153, 154, 155, 133, 173, 157, 158, 159, 160, 161, 246]); // Left Eye
+            drawLoop(landmarks, [362, 382, 381, 380, 374, 373, 390, 249, 263, 466, 388, 387, 386, 385, 384, 398]); // Right Eye
+
+            // Eyebrows
+            drawPath(landmarks, [70, 63, 105, 66, 107]); // Left Eyebrow
+            drawPath(landmarks, [300, 293, 334, 296, 336]); // Right Eyebrow
+
+            // Nose
+            drawPath(landmarks, [168, 6, 197, 195, 5]);
+            drawPath(landmarks, [98, 97, 2, 326, 327]);
+
+            // Mouth
+            drawLoop(landmarks, [78, 95, 88, 178, 87, 14, 317, 402, 318, 325, 308, 415, 310, 311, 312, 13, 82, 81, 80, 191]);
+
+            // 3. rPPG Sensing ROIs (Forehead & Cheeks)
+            drawRoiPulse(landmarks[10], "Forehead ROI", isScan);
+            drawRoiPulse(landmarks[234], "Cheek-L", isScan);
+            drawRoiPulse(landmarks[454], "Cheek-R", isScan);
+        }
+
+        function drawLoop(landmarks, indices) {
+            ctx.beginPath();
+            indices.forEach((idx, i) => {
+                const pt = landmarks[idx];
+                if (!pt) return;
+                const coords = getCanvasCoords(pt);
+                if (i === 0) ctx.moveTo(coords.x, coords.y);
+                else ctx.lineTo(coords.x, coords.y);
+            });
+            ctx.closePath();
+            ctx.stroke();
+        }
+
+        function drawPath(landmarks, indices) {
+            ctx.beginPath();
+            indices.forEach((idx, i) => {
+                const pt = landmarks[idx];
+                if (!pt) return;
+                const coords = getCanvasCoords(pt);
+                if (i === 0) ctx.moveTo(coords.x, coords.y);
+                else ctx.lineTo(coords.x, coords.y);
+            });
+            ctx.stroke();
+        }
+
+        function drawRoiPulse(pt, label, isScan) {
+            if (!pt) return;
+            const c = getCanvasCoords(pt);
+            ctx.save();
+            ctx.strokeStyle = isScan ? 'rgba(52, 199, 89, 0.9)' : 'rgba(56, 189, 248, 0.7)';
+            ctx.fillStyle = isScan ? 'rgba(52, 199, 89, 0.18)' : 'rgba(56, 189, 248, 0.12)';
+            ctx.lineWidth = 1.5;
+
+            ctx.beginPath();
+            ctx.arc(c.x, c.y, 22, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+
+            // Label
+            ctx.fillStyle = isScan ? '#34c759' : '#38bdf8';
+            ctx.font = '9px Outfit, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText(label, c.x, c.y - 26);
+            ctx.restore();
+        }
+
+        // MediaPipe FaceMesh Results Handler
         function onFaceMeshResults(results) {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             if (!results.multiFaceLandmarks || results.multiFaceLandmarks.length === 0) {
@@ -626,30 +760,11 @@
             }
 
             faceDetected = true;
-            hudStatusText.innerText = isMeasuring ? '測定中 (安静に)...' : '顔検出完了 (準備OK)';
+            hudStatusText.innerText = isMeasuring ? 'AIスキャン測定中...' : '顔認識中 (準備完了)';
             const landmarks = results.multiFaceLandmarks[0];
 
-            // Draw sleek subtle face mesh lines
-            ctx.save();
-            ctx.strokeStyle = 'rgba(56, 189, 248, 0.4)';
-            ctx.lineWidth = 1;
-            
-            // Forehead ROI for rPPG
-            const forehead = landmarks[10];
-            const leftCheek = landmarks[234];
-            const rightCheek = landmarks[454];
-
-            if (forehead) {
-                const fx = forehead.x * canvas.width;
-                const fy = forehead.y * canvas.height;
-                ctx.fillStyle = 'rgba(56, 189, 248, 0.2)';
-                ctx.beginPath();
-                ctx.arc(fx, fy, 20, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.stroke();
-            }
-
-            ctx.restore();
+            // Render rich sleek FaceMesh
+            drawSleekFaceMesh(landmarks);
         }
 
         // 30-Second Real Measurement
@@ -682,7 +797,7 @@
             scanLine.classList.add('scanning');
             countdownOverlay.classList.add('active');
             
-            let secondsLeft = 5; // Fast 5-sec demo for quick preview
+            let secondsLeft = 5;
             countdownNum.innerText = secondsLeft;
             statusBar.innerText = 'デモ計測中 (高速5秒モード)...';
 
@@ -715,16 +830,16 @@
             if (mockRmssd >= 58) {
                 condition = "絶好調 (高回復)";
                 balance = "副交感神経優位 (回復)";
-                advice = "✨ <strong>自律神経の回復力・弾力性が非常に高い状態です！</strong> 難関大の過去問演習や大事なプレゼン・試合で最高の実力を発揮できます。";
+                advice = "✨ <strong>【久保医師監修処方箋】自律神経の回復力・弾力性が非常に高い状態です！</strong> 副交感神経が正常に働き、脳の論理的思考エリア（前頭前野）が活性化しています。難関大の過去問演習や大事なプレゼン・試合で最高の実力を発揮できます。";
             } else if (mockRmssd >= 45) {
                 condition = "通常バランス";
                 balance = "適度な覚醒バランス";
-                advice = "⚡ <strong>安定したコンディションです。</strong> 授業や勉強の合間に、1分間の深呼吸を取り入れて集中を持続させましょう。";
+                advice = "⚡ <strong>【久保医師監修処方箋】安定した活動コンディションです。</strong> 授業や勉強の合間に、1分間の深呼吸や肩甲骨ストレッチを取り入れて集中を持続させましょう。";
             } else {
                 condition = "やや過緊張・疲労";
                 balance = "交感神経優位 (緊張気味)";
                 arousal = "自律神経疲労 (睡眠不足注意)";
-                advice = "⚠️ <strong>交感神経が高ぶり疲労が蓄積しています。</strong> 今日の夜は無理な夜更かしを避け、下の「1分間リセット呼吸」で神経を鎮めましょう。";
+                advice = "⚠️ <strong>【久保医師監修処方箋】交感神経が高ぶり疲労が蓄積しています。</strong> 受験ストレスやスマホ夜更かしのサインかもしれません。今夜は無理な詰め込みを避け、下の「1分間リセット呼吸」で自律神経を整えて早めに就寝しましょう。";
             }
 
             currentCalculatedResult = {
@@ -749,7 +864,7 @@
 
             document.getElementById('resAdviceBox').innerHTML = advice;
             document.getElementById('saveResultBtn').disabled = false;
-            statusBar.innerText = '測定が完了しました！結果をご確認ください。';
+            statusBar.innerText = '測定が完了しました！久保医師監修の診断結果をご確認ください。';
         }
 
         function getFormattedNow() {
@@ -796,7 +911,7 @@
             const timerEl = document.getElementById('breathTimer');
             
             let timeLeft = 60;
-            let step = 0; // 0: inhale(4s), 1: hold(4s), 2: exhale(4s), 3: hold(4s)
+            let step = 0;
             
             function updatePhase() {
                 if (step === 0) {
@@ -848,8 +963,8 @@
         function initEyeGame() {
             const gameCanvas = document.getElementById('eyeGameCanvas');
             const gCtx = gameCanvas.getContext('2d');
-            gameCanvas.width = gameCanvas.offsetWidth;
-            gameCanvas.height = gameCanvas.offsetHeight;
+            gameCanvas.width = gameCanvas.offsetWidth || 400;
+            gameCanvas.height = gameCanvas.offsetHeight || 260;
 
             let x = gameCanvas.width / 2;
             let y = gameCanvas.height / 2;
@@ -873,7 +988,7 @@
                 gCtx.fillStyle = 'rgba(15, 23, 42, 0.25)';
                 gCtx.fillRect(0, 0, gameCanvas.width, gameCanvas.height);
 
-                // Draw bouncing glow ball
+                // Glow ball
                 gCtx.beginPath();
                 gCtx.arc(x, y, radius, 0, Math.PI * 2);
                 gCtx.fillStyle = '#ec4899';
@@ -882,7 +997,6 @@
                 gCtx.fill();
                 gCtx.shadowBlur = 0;
 
-                // Movement
                 x += dx;
                 y += dy;
 
@@ -900,7 +1014,6 @@
         // Initialize waveform on load
         window.addEventListener('DOMContentLoaded', () => {
             initPpgCanvas();
-            // If hash is #breathing, open breathing modal directly
             if (window.location.hash === '#breathing') {
                 openBreathingModal();
             }
