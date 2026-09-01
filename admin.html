@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>CORE CONNECT Academy - 教育機関・保健室・学生相談室ダッシュボード</title>
+    
+    <!-- Link to the standard design system -->
+    <link rel="stylesheet" href="portal.css">
+    
+    <style>
+        .admin-login-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: radial-gradient(circle at bottom right, #0f172a 0%, #1e1b4b 100%);
+        }
+
+        .admin-login-card {
+            width: 100%;
+            max-width: 440px;
+            background: rgba(30, 41, 59, 0.85);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-radius: 20px;
+            padding: 36px 30px;
+            color: #ffffff;
+        }
+
+        .admin-login-logo {
+            text-align: center;
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            margin-bottom: 6px;
+            background: linear-gradient(135deg, #38bdf8, #818cf8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Stats Summary Grid */
+        .stats-summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: #ffffff;
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 20px;
+            border-left: 4px solid var(--accent-blue);
+        }
+
+        .stat-card.warning {
+            border-left-color: var(--accent-orange);
+        }
+
+        .stat-card.alert {
+            border-left-color: var(--accent-red);
+        }
+
+        .stat-card.success {
+            border-left-color: var(--accent-green);
+        }
+
+        .stat-value {
+            font-size: 26px;
+            font-weight: 800;
+            margin-top: 4px;
+            color: var(--text-primary);
+        }
+
+        /* Admin Table */
+        .admin-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 13px;
+        }
+
+        .admin-table th, .admin-table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .admin-table th {
+            background: #f8fafc;
+            color: var(--text-secondary);
+            font-weight: 700;
+            font-size: 12px;
+        }
+
+        .admin-table tr:hover td {
+            background: #f8fafc;
+        }
+
+        .progress-bar-bg {
+            width: 100%;
+            height: 8px;
+            background: #f1f5f9;
+            border-radius: 9999px;
+            overflow: hidden;
+            margin-top: 6px;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #38bdf8, #3b82f6);
+            border-radius: 9999px;
+        }
+
+        .privacy-banner {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            border-radius: 12px;
+            padding: 14px 18px;
+            font-size: 12px;
+            color: #1e40af;
+            line-height: 1.6;
+            margin-bottom: 24px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 1. Admin Authentication -->
+    <div class="admin-login-container" id="adminLoginSection">
+        <div class="admin-login-card">
+            <div class="admin-login-logo">CORE CONNECT Academy</div>
+            <div style="text-align: center; font-size: 13px; color: #94a3b8; margin-bottom: 24px;">
+                教育機関・保健室・学生相談室 管理者ポータル
+            </div>
+
+            <form id="academyAdminForm" onsubmit="handleAdminLogin(event)">
+                <div class="form-group">
+                    <label style="color: #cbd5e1;">学校・教育機関コード</label>
+                    <input type="text" id="adminSchoolCode" class="form-input" required value="ACAD-HS-01" style="background:#0f172a; border-color:#334155; color:#fff;">
+                </div>
+                <div class="form-group">
+                    <label style="color: #cbd5e1;">管理者 / 教員ID</label>
+                    <input type="text" id="adminUserId" class="form-input" required value="STAFF-NURSE-01" style="background:#0f172a; border-color:#334155; color:#fff;">
+                </div>
+                <div class="form-group">
+                    <label style="color: #cbd5e1;">担当役割・部門</label>
+                    <select id="adminRole" class="form-input" style="background:#0f172a; border-color:#334155; color:#fff;">
+                        <option value="保健室・養護教諭">保健室・養護教諭</option>
+                        <option value="スクールカウンセラー">スクールカウンセラー (臨床心理士)</option>
+                        <option value="学年主任・進路指導部">学年主任・進路指導部</option>
+                        <option value="大学キャリアセンター">大学キャリアセンター / 学生相談室</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%; border-radius: 9999px; padding: 12px; margin-top: 12px; background: linear-gradient(135deg, #38bdf8, #6366f1);">
+                    管理者ログイン
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 2. Admin Dashboard Workspace -->
+    <div id="adminPortalSection" style="display: none;">
+        <!-- Header -->
+        <header>
+            <div class="logo">
+                CORE CONNECT <span class="logo-badge">Academy Admin</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 14px;">
+                <div style="font-size: 12px; color: var(--text-secondary); background: #f1f5f9; padding: 6px 14px; border-radius: 9999px; display: inline-flex; align-items: center; gap: 8px;">
+                    <span class="badge badge-purple" id="displayAdminRole">保健室・養護教諭</span>
+                    <span id="displayAdminSchool" style="font-weight: 700;">桜ヶ丘高等学校</span>
+                </div>
+                <button class="btn btn-secondary" style="padding: 6px 14px; font-size: 11px;" onclick="handleAdminLogout()">ログアウト</button>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <div style="max-width: 1240px; margin: 0 auto; padding: 24px 20px 48px;">
+
+            <!-- Privacy Policy Notice -->
+            <div class="privacy-banner">
+                <strong>🛡️ 教育現場プライバシー保護基準 (文部科学省・個人情報保護法準拠)</strong><br>
+                本ダッシュボードで閲覧できるのは、クラス・学年・部活動単位の「匿名統計データ」です。特定の生徒の個別の脈拍やHRV数値を教員が一方的に特定・監視することはシステム上排除されており、生徒が自発的に相談室に連携を希望した場合のみ個別支援が可能です。
+            </div>
+
+            <!-- Stats Summary -->
+            <div class="stats-summary-grid">
+                <div class="stat-card">
+                    <div style="font-size: 12px; color: var(--text-secondary); font-weight: 700;">今週の30秒スキャン実施率</div>
+                    <div class="stat-value" style="color: var(--accent-blue);">78.4%</div>
+                    <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">全生徒 520名中 408名が習慣化</div>
+                </div>
+
+                <div class="stat-card success">
+                    <div style="font-size: 12px; color: var(--text-secondary); font-weight: 700;">学校全体 平均自律神経 (RMSSD)</div>
+                    <div class="stat-value" style="color: var(--accent-green);">52.6 ms</div>
+                    <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">青年期平均基準 (45〜65ms) 良好</div>
+                </div>
+
+                <div class="stat-card warning">
+                    <div style="font-size: 12px; color: var(--text-secondary); font-weight: 700;">要ケア・過緊張トレンド検知</div>
+                    <div class="stat-value" style="color: var(--accent-orange);">12.5%</div>
+                    <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">高校3年 (受験期) に集中</div>
+                </div>
+
+                <div class="stat-card alert">
+                    <div style="font-size: 12px; color: var(--text-secondary); font-weight: 700;">相談室オンライン予約・SOS件数</div>
+                    <div class="stat-value" style="color: var(--accent-red);">6 件</div>
+                    <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">今週の未対応リクエスト: 2件</div>
+                </div>
+            </div>
+
+            <!-- Group Analytics Table -->
+            <div class="glass-card" style="margin-bottom: 24px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                    <div class="panel-title">
+                        <span>🏫 学年・専攻・部活動別 自律神経コンディション集計</span>
+                    </div>
+                    <span style="font-size: 11px; color: var(--text-muted);">毎週月曜自動集計</span>
+                </div>
+
+                <div style="overflow-x: auto;">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>対象グループ</th>
+                                <th>対象生徒数</th>
+                                <th>測定実施率</th>
+                                <th>平均HRV (RMSSD)</th>
+                                <th>自律神経状態判定</th>
+                                <th>推奨される学校支援アクション</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>高校1年生 (全体)</strong></td>
+                                <td>180名</td>
+                                <td>
+                                    <div>82%</div>
+                                    <div class="progress-bar-bg"><div class="progress-bar-fill" style="width: 82%;"></div></div>
+                                </td>
+                                <td style="font-weight: 700; color: var(--accent-green);">56.2 ms</td>
+                                <td><span class="badge badge-green">良好 (適応順調)</span></td>
+                                <td style="font-size: 12px; color: var(--text-secondary);">高校生活のリズム定着・現状維持</td>
+                            </tr>
+                            <tr>
+                                <td><strong>高校2年生 (理系特進・文系)</strong></td>
+                                <td>170名</td>
+                                <td>
+                                    <div>76%</div>
+                                    <div class="progress-bar-bg"><div class="progress-bar-fill" style="width: 76%;"></div></div>
+                                </td>
+                                <td style="font-weight: 700; color: var(--accent-blue);">51.4 ms</td>
+                                <td><span class="badge badge-blue">通常バランス</span></td>
+                                <td style="font-size: 12px; color: var(--text-secondary);">部活と勉強の両立支援、睡眠啓発</td>
+                            </tr>
+                            <tr>
+                                <td><strong>高校3年生 (大学受験学年)</strong></td>
+                                <td>170名</td>
+                                <td>
+                                    <div>77%</div>
+                                    <div class="progress-bar-bg"><div class="progress-bar-fill" style="width: 77%;"></div></div>
+                                </td>
+                                <td style="font-weight: 700; color: var(--accent-orange);">41.8 ms</td>
+                                <td><span class="badge badge-orange">過緊張・模試ストレス</span></td>
+                                <td style="font-size: 12px; color: var(--accent-orange); font-weight: 600;">試験直前呼吸法の導入、面談の実施</td>
+                            </tr>
+                            <tr>
+                                <td><strong>運動部・強化指定アスリート</strong></td>
+                                <td>85名</td>
+                                <td>
+                                    <div>92%</div>
+                                    <div class="progress-bar-bg"><div class="progress-bar-fill" style="width: 92%;"></div></div>
+                                </td>
+                                <td style="font-weight: 700; color: var(--accent-teal);">58.0 ms</td>
+                                <td><span class="badge badge-green">高リカバリー</span></td>
+                                <td style="font-size: 12px; color: var(--text-secondary);">大会前のオーバートレーニング予防</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Event & Term Correlation Insights -->
+            <div class="glass-card">
+                <div class="panel-title" style="margin-bottom: 12px;">
+                    <span>📊 学校行事・学期サイクルにおける自律神経変動の傾向分析</span>
+                </div>
+                <div style="font-size: 13px; color: var(--text-secondary); line-height: 1.6;">
+                    <ul>
+                        <li><strong>5月・9月（新学期・夏休み明け）:</strong> 起立性調節障害や朝の覚醒度低下（RMSSDの著しいブレ）が見られやすいため、保健だよりを通じた「朝の3ステップ覚醒法」の周知が有効です。</li>
+                        <li><strong>10月〜1月（模試・推薦入試・共通テスト期）:</strong> 受験生の自律神経が交感神経優位に偏る傾向。ホームルームでの「1分間Box Breathing」の実施が推奨されます。</li>
+                        <li><strong>就職活動解禁期（大学3年3月〜）:</strong> 面接対策と並行した自律神経コントロール指導が、内定承諾率とメンタル維持に寄与します。</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div style="margin-top: 24px; text-align: center;">
+                <button class="btn btn-secondary" onclick="location.href='index.html'" style="border-radius: 9999px; padding: 10px 24px;">
+                    ← 学生ポータル画面へ戻る
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Script Logic -->
+    <script>
+        function checkAdminSession() {
+            const session = JSON.parse(localStorage.getItem('academy_admin_session'));
+            const loginSec = document.getElementById('adminLoginSection');
+            const portalSec = document.getElementById('adminPortalSection');
+
+            if (session) {
+                loginSec.style.display = 'none';
+                portalSec.style.display = 'block';
+                document.getElementById('displayAdminRole').innerText = session.role;
+                document.getElementById('displayAdminSchool').innerText = session.schoolCode === 'ACAD-HS-01' ? '桜ヶ丘高等学校' : session.schoolCode;
+            } else {
+                loginSec.style.display = 'flex';
+                portalSec.style.display = 'none';
+            }
+        }
+
+        window.handleAdminLogin = function(event) {
+            event.preventDefault();
+            const schoolCode = document.getElementById('adminSchoolCode').value;
+            const userId = document.getElementById('adminUserId').value;
+            const role = document.getElementById('adminRole').value;
+
+            const session = { schoolCode, userId, role };
+            localStorage.setItem('academy_admin_session', JSON.stringify(session));
+            checkAdminSession();
+        };
+
+        window.handleAdminLogout = function() {
+            localStorage.removeItem('academy_admin_session');
+            location.reload();
+        };
+
+        document.addEventListener('DOMContentLoaded', checkAdminSession);
+    </script>
+</body>
+</html>

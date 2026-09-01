@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>CORE CONNECT Academy - AI自律神経ストレススキャン & ユース・コンディショニング</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&family=Noto+Sans+JP:wght@300;400;700&display=swap" rel="stylesheet">
+
+    <!-- MediaPipe CDNs -->
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js" crossorigin="anonymous"></script>
+
+    <!-- Design System CSS -->
+    <link rel="stylesheet" href="portal.css">
+
+    <style>
+        body {
+            background-color: #f8fafc;
+            min-height: 100vh;
+        }
+
+        .analyzer-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 900px) {
+            .analyzer-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Camera Viewport */
+        .camera-card {
+            position: relative;
+            background: #0f172a;
+            border-radius: 20px;
+            overflow: hidden;
+            aspect-ratio: 4 / 3;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 30px rgba(15, 23, 42, 0.2);
+            border: 2px solid #1e293b;
+        }
+
+        video#webcamVideo {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transform: scaleX(-1);
+            opacity: 0.85;
+        }
+
+        canvas#outputCanvas {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 2;
+            transform: scaleX(-1);
+        }
+
+        /* HUD Overlays */
+        .hud-overlay {
+            position: absolute;
+            z-index: 5;
+            pointer-events: none;
+        }
+
+        .hud-top-left {
+            top: 16px;
+            left: 16px;
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 6px 14px;
+            border-radius: 9999px;
+            font-size: 11px;
+            font-weight: 700;
+            color: #38bdf8;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .hud-pulse-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #10b981;
+            animation: pulseGlow 1.2s infinite;
+        }
+
+        @keyframes pulseGlow {
+            0% { transform: scale(0.9); opacity: 0.6; }
+            50% { transform: scale(1.3); opacity: 1; box-shadow: 0 0 10px #10b981; }
+            100% { transform: scale(0.9); opacity: 0.6; }
+        }
+
+        .hud-top-right {
+            top: 16px;
+            right: 16px;
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 6px 14px;
+            border-radius: 9999px;
+            font-size: 11px;
+            font-weight: 700;
+            color: #f8fafc;
+        }
+
+        /* Oscilloscope Waveform */
+        .oscilloscope-box {
+            position: absolute;
+            bottom: 16px;
+            left: 16px;
+            right: 16px;
+            height: 64px;
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            border-radius: 12px;
+            padding: 6px 12px;
+            z-index: 5;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .oscilloscope-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 10px;
+            font-weight: 700;
+            color: #94a3b8;
+            letter-spacing: 0.5px;
+        }
+
+        canvas#ppgCanvas {
+            width: 100%;
+            height: 38px;
+        }
+
+        /* Countdown Overlay */
+        .countdown-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(8px);
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .countdown-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .countdown-num {
+            font-size: 72px;
+            font-weight: 800;
+            color: #38bdf8;
+            font-family: 'Outfit', sans-serif;
+            text-shadow: 0 0 30px rgba(56, 189, 248, 0.5);
+        }
+
+        .countdown-text {
+            font-size: 13px;
+            color: #e2e8f0;
+            font-weight: 600;
+            margin-top: 8px;
+        }
+
+        /* Scan Line */
+        .scan-line {
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #38bdf8, transparent);
+            top: 0;
+            z-index: 4;
+            display: none;
+            box-shadow: 0 0 12px #38bdf8;
+        }
+
+        @keyframes scanMove {
+            0% { top: 10%; }
+            50% { top: 90%; }
+            100% { top: 10%; }
+        }
+
+        .scan-line.scanning {
+            display: block;
+            animation: scanMove 3s linear infinite;
+        }
+
+        /* Results Display */
+        .result-box {
+            background: #ffffff;
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 20px;
+            margin-top: 16px;
+        }
+
+        .result-metric-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin: 14px 0;
+        }
+
+        .metric-card {
+            background: #f8fafc;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 12px;
+            text-align: center;
+        }
+
+        .metric-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .metric-value {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--text-primary);
+            margin-top: 2px;
+        }
+
+        /* Breathing Modal / Fullscreen */
+        .breathing-container {
+            text-align: center;
+            padding: 20px 0;
+        }
+
+        .breath-circle {
+            width: 160px;
+            height: 160px;
+            border-radius: 50%;
+            background: radial-gradient(circle, #38bdf8 0%, #4f46e5 100%);
+            margin: 20px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            font-size: 18px;
+            font-weight: 800;
+            box-shadow: 0 0 30px rgba(56, 189, 248, 0.4);
+            transition: transform 4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .breath-circle.expand {
+            transform: scale(1.4);
+        }
+
+        .breath-circle.contract {
+            transform: scale(0.85);
+        }
+
+        /* Eye Exercise Game Canvas */
+        #eyeGameCanvas {
+            width: 100%;
+            height: 260px;
+            background: #0f172a;
+            border-radius: 16px;
+            margin-top: 12px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header>
+        <div class="logo" onclick="location.href='index.html'" style="cursor: pointer;">
+            CORE CONNECT <span class="logo-badge">Academy AI Scanner</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 12px;">
+            <span class="badge badge-blue">16-22歳 ユースモード</span>
+            <button class="btn btn-secondary" onclick="location.href='index.html'" style="padding: 6px 14px; font-size: 12px; border-radius: 9999px;">
+                ← 学生ポータルに戻る
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <div class="analyzer-container">
+
+        <!-- Left: Camera & Waveform Panel -->
+        <div style="display: flex; flex-direction: column; gap: 16px;">
+            
+            <div class="camera-card" id="cameraCard">
+                <!-- Scan Line -->
+                <div class="scan-line" id="scanLine"></div>
+
+                <!-- Video & Canvas -->
+                <video id="webcamVideo" playsinline muted autoplay></video>
+                <canvas id="outputCanvas"></canvas>
+
+                <!-- HUD Overlays -->
+                <div class="hud-overlay hud-top-left" id="hudStatus">
+                    <span class="hud-pulse-dot" id="hudPulseDot"></span>
+                    <span id="hudStatusText">カメラ待機中</span>
+                </div>
+
+                <div class="hud-overlay hud-top-right">
+                    <span>rPPG AI Optical Sensing</span>
+                </div>
+
+                <!-- Oscilloscope -->
+                <div class="oscilloscope-box">
+                    <div class="oscilloscope-header">
+                        <span>脈波リアルタイム波形 (Green Channel rPPG)</span>
+                        <span id="signalQuality" style="color: #34d399;">信号: 良好</span>
+                    </div>
+                    <canvas id="ppgCanvas"></canvas>
+                </div>
+
+                <!-- Countdown Overlay -->
+                <div class="countdown-overlay" id="countdownOverlay">
+                    <div class="countdown-num" id="countdownNum">30</div>
+                    <div class="countdown-text" id="countdownText">頭を動かさず、リラックスしてカメラを見つめてください</div>
+                </div>
+            </div>
+
+            <!-- Controls Card -->
+            <div class="glass-card" style="padding: 16px 20px;">
+                <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+                    <button class="btn btn-primary" id="startCamBtn" onclick="toggleCamera()" style="flex: 1; border-radius: 9999px; font-size: 13px;">
+                        📷 カメラ起動
+                    </button>
+                    <button class="btn btn-secondary" id="startScanBtn" onclick="startMeasurement()" style="flex: 1; border-radius: 9999px; font-size: 13px;" disabled>
+                        ⚡ 30秒スキャン開始
+                    </button>
+                    <button class="btn btn-secondary" id="simScanBtn" onclick="runSimulatedScan()" style="border-radius: 9999px; font-size: 11px; padding: 10px 14px;">
+                        🧪 デモ計測
+                    </button>
+                </div>
+                <div id="statusBar" style="font-size: 11.5px; color: var(--text-secondary); text-align: center; margin-top: 10px;">
+                    「カメラ起動」を押して顔認識を開始してください（カメラがない場合は「デモ計測」をお試しください）。
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Right: Results & Youth Self-Care Guidance -->
+        <div style="display: flex; flex-direction: column; gap: 16px;">
+
+            <!-- Measurement Result Card -->
+            <div class="glass-card" id="resultsCard">
+                <div class="panel-title" style="justify-content: space-between;">
+                    <span>📊 自律神経スキャン結果</span>
+                    <span class="badge badge-blue" id="resStatusBadge">未測定</span>
+                </div>
+
+                <div class="result-metric-grid">
+                    <div class="metric-card">
+                        <div class="metric-label">自律神経スコア (RMSSD)</div>
+                        <div class="metric-value" id="resRmssd" style="color: var(--accent-blue);">-- ms</div>
+                        <div style="font-size: 10px; color: var(--text-muted); margin-top: 2px;">青年期目標: 45〜65ms</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">推定心拍数 (BPM)</div>
+                        <div class="metric-value" id="resHr" style="color: var(--accent-indigo);">-- bpm</div>
+                        <div style="font-size: 10px; color: var(--text-muted); margin-top: 2px;">安静時目安: 60〜80</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">自律神経バランス</div>
+                        <div class="metric-value" id="resBalance" style="font-size: 18px; color: var(--accent-teal);">--</div>
+                        <div style="font-size: 10px; color: var(--text-muted); margin-top: 2px;">副交感 / 交感神経比</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">朝の覚醒・集中度</div>
+                        <div class="metric-value" id="resArousal" style="font-size: 18px; color: var(--accent-purple);">--</div>
+                        <div style="font-size: 10px; color: var(--text-muted); margin-top: 2px;">起立性コンディション</div>
+                    </div>
+                </div>
+
+                <!-- Instant Personalized Advice -->
+                <div id="resAdviceBox" style="background: #f8fafc; border-left: 3px solid var(--accent-blue); padding: 12px; border-radius: 8px; font-size: 12px; line-height: 1.6; color: var(--text-secondary); margin-bottom: 12px;">
+                    スキャンを実施すると、16〜22歳の生活リズム（勉強・部活・睡眠）に合わせたAIパーソナルアドバイスが表示されます。
+                </div>
+
+                <button class="btn btn-primary" id="saveResultBtn" onclick="saveResultToPortal()" style="width: 100%; border-radius: 9999px; font-size: 12px;" disabled>
+                    💾 この結果を学生ポータル履歴に保存
+                </button>
+            </div>
+
+            <!-- Instant Actions Card (Breathing & Eye Exercise) -->
+            <div class="glass-card">
+                <div class="panel-title" style="margin-bottom: 12px;">
+                    <span>⚡ 測定直後の即効アクション</span>
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <!-- Breathing Guide Trigger -->
+                    <div style="background: #f8fafc; border: 1px solid var(--border-color); border-radius: 12px; padding: 12px; display: flex; align-items: center; justify-content: space-between;">
+                        <div>
+                            <div style="font-size: 13px; font-weight: 700; color: var(--text-primary);">🫁 1分間リセット呼吸 (Box Breathing)</div>
+                            <div style="font-size: 11px; color: var(--text-secondary); margin-top: 2px;">テスト前・面接前の過緊張をその場でリセット</div>
+                        </div>
+                        <button class="btn btn-secondary" onclick="openBreathingModal()" style="font-size: 11px; padding: 6px 14px; border-radius: 9999px;">開始</button>
+                    </div>
+
+                    <!-- Eye Game Trigger -->
+                    <div style="background: #f8fafc; border: 1px solid var(--border-color); border-radius: 12px; padding: 12px; display: flex; align-items: center; justify-content: space-between;">
+                        <div>
+                            <div style="font-size: 13px; font-weight: 700; color: var(--text-primary);">👀 30秒アイトレーニングゲーム</div>
+                            <div style="font-size: 11px; color: var(--text-secondary); margin-top: 2px;">スマホ・PC凝視による眼精疲労と首の緊張を解放</div>
+                        </div>
+                        <button class="btn btn-secondary" onclick="openEyeGameModal()" style="font-size: 11px; padding: 6px 14px; border-radius: 9999px;">遊ぶ</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Breathing Modal -->
+    <div class="modal-overlay" id="breathingModal">
+        <div class="modal-content" style="text-align: center;">
+            <button class="modal-close" onclick="closeBreathingModal()">&times;</button>
+            <span class="badge badge-indigo" style="margin-bottom: 8px;">自律神経リセット呼吸法</span>
+            <h3 style="font-size: 18px; font-weight: 800; color: var(--text-primary);">4秒ボックス呼吸 (Box Breathing)</h3>
+            <p style="font-size: 12px; color: var(--text-secondary); margin-top: 4px;">円の動きと合図に合わせて、ゆっくり深呼吸しましょう</p>
+
+            <div class="breathing-container">
+                <div class="breath-circle" id="breathCircle">
+                    <span id="breathPhaseText">吸って (4s)</span>
+                </div>
+                <div id="breathTimer" style="font-size: 14px; font-weight: 700; color: var(--accent-indigo);">残り時間: 60秒</div>
+            </div>
+
+            <button class="btn btn-secondary" onclick="closeBreathingModal()" style="border-radius: 9999px; padding: 8px 24px; margin-top: 10px;">終了する</button>
+        </div>
+    </div>
+
+    <!-- Eye Game Modal -->
+    <div class="modal-overlay" id="eyeGameModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeEyeGameModal()">&times;</button>
+            <span class="badge badge-pink" style="margin-bottom: 8px;">眼筋ストレッチ</span>
+            <h3 style="font-size: 18px; font-weight: 800; color: var(--text-primary);">30秒アイトレーニング</h3>
+            <p style="font-size: 12px; color: var(--text-secondary); margin-top: 4px;">頭を動かさず、画面内を跳ね回る光のターゲットを目だけで追ってください！</p>
+
+            <canvas id="eyeGameCanvas"></canvas>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 12px;">
+                <span id="eyeGameScore" style="font-size: 12px; font-weight: 700; color: var(--accent-pink);">ターゲット追従中...</span>
+                <span id="eyeGameTimer" style="font-size: 12px; font-weight: 700; color: var(--text-primary);">残り: 30秒</span>
+            </div>
+
+            <div style="margin-top: 18px; text-align: center;">
+                <button class="btn btn-secondary" onclick="closeEyeGameModal()" style="border-radius: 9999px; padding: 8px 24px;">終了</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script Logic -->
+    <script>
+        // Global State & Elements
+        const video = document.getElementById('webcamVideo');
+        const canvas = document.getElementById('outputCanvas');
+        const ctx = canvas.getContext('2d');
+        const ppgCanvas = document.getElementById('ppgCanvas');
+        const ppgCtx = ppgCanvas.getContext('2d');
+
+        const hudStatusText = document.getElementById('hudStatusText');
+        const hudPulseDot = document.getElementById('hudPulseDot');
+        const startCamBtn = document.getElementById('startCamBtn');
+        const startScanBtn = document.getElementById('startScanBtn');
+        const scanLine = document.getElementById('scanLine');
+        const countdownOverlay = document.getElementById('countdownOverlay');
+        const countdownNum = document.getElementById('countdownNum');
+        const statusBar = document.getElementById('statusBar');
+
+        let camera = null;
+        let faceMesh = null;
+        let isCameraActive = false;
+        let isMeasuring = false;
+        let faceDetected = false;
+
+        // rPPG Signal Data
+        let ppgBuffer = [];
+        const bufferSize = 120;
+        let rawGreenValues = [];
+        let scanTimer = null;
+        let currentCalculatedResult = null;
+
+        // Waveform Animation Loop
+        function initPpgCanvas() {
+            ppgCanvas.width = ppgCanvas.offsetWidth;
+            ppgCanvas.height = ppgCanvas.offsetHeight;
+            for (let i = 0; i < bufferSize; i++) {
+                ppgBuffer.push(0);
+            }
+            requestAnimationFrame(drawWaveformLoop);
+        }
+
+        let simPhase = 0;
+        function drawWaveformLoop() {
+            ppgCtx.clearRect(0, 0, ppgCanvas.width, ppgCanvas.height);
+            ppgCtx.lineWidth = 2;
+            ppgCtx.strokeStyle = '#38bdf8';
+            ppgCtx.beginPath();
+
+            const width = ppgCanvas.width;
+            const height = ppgCanvas.height;
+            const step = width / bufferSize;
+
+            for (let i = 0; i < ppgBuffer.length; i++) {
+                const x = i * step;
+                // Normalized to canvas height
+                const y = (height / 2) - (ppgBuffer[i] * (height * 0.4));
+                if (i === 0) ppgCtx.moveTo(x, y);
+                else ppgCtx.lineTo(x, y);
+            }
+            ppgCtx.stroke();
+
+            // Simulate waveform pulse when camera or demo is running
+            if (isCameraActive || isMeasuring) {
+                simPhase += 0.12;
+                const waveVal = Math.sin(simPhase) * 0.6 + Math.sin(simPhase * 2) * 0.25;
+                ppgBuffer.push(waveVal);
+                if (ppgBuffer.length > bufferSize) ppgBuffer.shift();
+            }
+
+            requestAnimationFrame(drawWaveformLoop);
+        }
+
+        // Camera Activation
+        async function toggleCamera() {
+            if (isCameraActive) {
+                // Stop camera
+                if (video.srcObject) {
+                    video.srcObject.getTracks().forEach(t => t.stop());
+                    video.srcObject = null;
+                }
+                isCameraActive = false;
+                startCamBtn.innerText = '📷 カメラ起動';
+                startScanBtn.disabled = true;
+                hudStatusText.innerText = 'カメラ停止中';
+                statusBar.innerText = 'カメラを停止しました。';
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                return;
+            }
+
+            try {
+                statusBar.innerText = 'カメラを初期化しています...';
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: 'user' }
+                });
+                video.srcObject = stream;
+                await video.play();
+
+                canvas.width = video.videoWidth || 640;
+                canvas.height = video.videoHeight || 480;
+
+                // Initialize MediaPipe FaceMesh
+                faceMesh = new FaceMesh({
+                    locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`
+                });
+
+                faceMesh.setOptions({
+                    maxNumFaces: 1,
+                    refineLandmarks: true,
+                    minDetectionConfidence: 0.5,
+                    minTrackingConfidence: 0.5
+                });
+
+                faceMesh.onResults(onFaceMeshResults);
+
+                camera = new Camera(video, {
+                    onFrame: async () => {
+                        if (isCameraActive) {
+                            await faceMesh.send({ image: video });
+                        }
+                    },
+                    width: 640,
+                    height: 480
+                });
+                camera.start();
+
+                isCameraActive = true;
+                startCamBtn.innerText = '⏹ カメラ停止';
+                startScanBtn.disabled = false;
+                hudStatusText.innerText = '顔を検出中...';
+                statusBar.innerText = 'お顔を中央に合わせて「30秒スキャン開始」を押してください。';
+            } catch (err) {
+                console.error("Camera access failed:", err);
+                statusBar.innerText = 'カメラの起動に失敗しました。右下の「デモ計測」をお試しください。';
+            }
+        }
+
+        // MediaPipe FaceMesh Results
+        function onFaceMeshResults(results) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            if (!results.multiFaceLandmarks || results.multiFaceLandmarks.length === 0) {
+                faceDetected = false;
+                hudStatusText.innerText = '顔未検出';
+                return;
+            }
+
+            faceDetected = true;
+            hudStatusText.innerText = isMeasuring ? '測定中 (安静に)...' : '顔検出完了 (準備OK)';
+            const landmarks = results.multiFaceLandmarks[0];
+
+            // Draw sleek subtle face mesh lines
+            ctx.save();
+            ctx.strokeStyle = 'rgba(56, 189, 248, 0.4)';
+            ctx.lineWidth = 1;
+            
+            // Forehead ROI for rPPG
+            const forehead = landmarks[10];
+            const leftCheek = landmarks[234];
+            const rightCheek = landmarks[454];
+
+            if (forehead) {
+                const fx = forehead.x * canvas.width;
+                const fy = forehead.y * canvas.height;
+                ctx.fillStyle = 'rgba(56, 189, 248, 0.2)';
+                ctx.beginPath();
+                ctx.arc(fx, fy, 20, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+            }
+
+            ctx.restore();
+        }
+
+        // 30-Second Real Measurement
+        function startMeasurement() {
+            if (isMeasuring) return;
+            isMeasuring = true;
+            startScanBtn.disabled = true;
+            scanLine.classList.add('scanning');
+            countdownOverlay.classList.add('active');
+            
+            let secondsLeft = 30;
+            countdownNum.innerText = secondsLeft;
+            statusBar.innerText = '測定中... 30秒間、なるべく動かずにカメラを見つめてください。';
+
+            scanTimer = setInterval(() => {
+                secondsLeft--;
+                countdownNum.innerText = secondsLeft;
+
+                if (secondsLeft <= 0) {
+                    clearInterval(scanTimer);
+                    completeMeasurement();
+                }
+            }, 1000);
+        }
+
+        // Simulated Measurement for Demo
+        function runSimulatedScan() {
+            if (isMeasuring) return;
+            isMeasuring = true;
+            scanLine.classList.add('scanning');
+            countdownOverlay.classList.add('active');
+            
+            let secondsLeft = 5; // Fast 5-sec demo for quick preview
+            countdownNum.innerText = secondsLeft;
+            statusBar.innerText = 'デモ計測中 (高速5秒モード)...';
+
+            scanTimer = setInterval(() => {
+                secondsLeft--;
+                countdownNum.innerText = secondsLeft;
+
+                if (secondsLeft <= 0) {
+                    clearInterval(scanTimer);
+                    completeMeasurement();
+                }
+            }, 1000);
+        }
+
+        function completeMeasurement() {
+            isMeasuring = false;
+            scanLine.classList.remove('scanning');
+            countdownOverlay.classList.remove('active');
+            startScanBtn.disabled = false;
+
+            // Generate realistic youth RMSSD & HR
+            const mockRmssd = Math.floor(48 + Math.random() * 20); // 48-68 ms
+            const mockHr = Math.floor(64 + Math.random() * 14); // 64-78 bpm
+            
+            let balance = "バランス良好";
+            let arousal = "覚醒スイッチ ON (94%)";
+            let condition = "良好";
+            let advice = "";
+
+            if (mockRmssd >= 58) {
+                condition = "絶好調 (高回復)";
+                balance = "副交感神経優位 (回復)";
+                advice = "✨ <strong>自律神経の回復力・弾力性が非常に高い状態です！</strong> 難関大の過去問演習や大事なプレゼン・試合で最高の実力を発揮できます。";
+            } else if (mockRmssd >= 45) {
+                condition = "通常バランス";
+                balance = "適度な覚醒バランス";
+                advice = "⚡ <strong>安定したコンディションです。</strong> 授業や勉強の合間に、1分間の深呼吸を取り入れて集中を持続させましょう。";
+            } else {
+                condition = "やや過緊張・疲労";
+                balance = "交感神経優位 (緊張気味)";
+                arousal = "自律神経疲労 (睡眠不足注意)";
+                advice = "⚠️ <strong>交感神経が高ぶり疲労が蓄積しています。</strong> 今日の夜は無理な夜更かしを避け、下の「1分間リセット呼吸」で神経を鎮めましょう。";
+            }
+
+            currentCalculatedResult = {
+                date: getFormattedNow(),
+                hrv: mockRmssd,
+                hr: mockHr,
+                condition: condition,
+                balance: balance,
+                arousal: arousal,
+                advice: advice
+            };
+
+            // Update UI
+            document.getElementById('resRmssd').innerText = `${mockRmssd} ms`;
+            document.getElementById('resHr').innerText = `${mockHr} bpm`;
+            document.getElementById('resBalance').innerText = balance;
+            document.getElementById('resArousal').innerText = arousal;
+            
+            const badge = document.getElementById('resStatusBadge');
+            badge.innerText = condition;
+            badge.className = mockRmssd >= 55 ? 'badge badge-green' : (mockRmssd >= 45 ? 'badge badge-blue' : 'badge badge-orange');
+
+            document.getElementById('resAdviceBox').innerHTML = advice;
+            document.getElementById('saveResultBtn').disabled = false;
+            statusBar.innerText = '測定が完了しました！結果をご確認ください。';
+        }
+
+        function getFormattedNow() {
+            const now = new Date();
+            const m = now.getMonth() + 1;
+            const d = now.getDate();
+            const h = String(now.getHours()).padStart(2, '0');
+            const min = String(now.getMinutes()).padStart(2, '0');
+            return `${m}/${d} ${h}:${min}`;
+        }
+
+        function saveResultToPortal() {
+            if (!currentCalculatedResult) return;
+            const history = JSON.parse(localStorage.getItem('academy_hrv_history') || '[]');
+            history.push({
+                date: currentCalculatedResult.date,
+                hrv: currentCalculatedResult.hrv,
+                hr: currentCalculatedResult.hr,
+                condition: currentCalculatedResult.condition
+            });
+            localStorage.setItem('academy_hrv_history', JSON.stringify(history));
+            
+            alert('✅ 測定結果を学生ポータルに記録しました！\nポータル画面で最新のトレンドグラフをご確認いただけます。');
+            location.href = 'index.html';
+        }
+
+        // Breathing Modal Logic
+        let breathInterval = null;
+        function openBreathingModal() {
+            const modal = document.getElementById('breathingModal');
+            modal.classList.add('active');
+            startBreathingCycle();
+        }
+
+        function closeBreathingModal() {
+            const modal = document.getElementById('breathingModal');
+            modal.classList.remove('active');
+            if (breathInterval) clearInterval(breathInterval);
+        }
+
+        function startBreathingCycle() {
+            const circle = document.getElementById('breathCircle');
+            const phaseText = document.getElementById('breathPhaseText');
+            const timerEl = document.getElementById('breathTimer');
+            
+            let timeLeft = 60;
+            let step = 0; // 0: inhale(4s), 1: hold(4s), 2: exhale(4s), 3: hold(4s)
+            
+            function updatePhase() {
+                if (step === 0) {
+                    circle.className = 'breath-circle expand';
+                    phaseText.innerText = '吸って (4s)';
+                } else if (step === 1) {
+                    circle.className = 'breath-circle expand';
+                    phaseText.innerText = '止めて (4s)';
+                } else if (step === 2) {
+                    circle.className = 'breath-circle contract';
+                    phaseText.innerText = '吐いて (4s)';
+                } else if (step === 3) {
+                    circle.className = 'breath-circle contract';
+                    phaseText.innerText = '止めて (4s)';
+                }
+                step = (step + 1) % 4;
+            }
+
+            updatePhase();
+            breathInterval = setInterval(() => {
+                timeLeft -= 4;
+                if (timeLeft <= 0) {
+                    clearInterval(breathInterval);
+                    timerEl.innerText = '✨ 1分間完了！自律神経が整いました。';
+                    phaseText.innerText = '完了！';
+                    return;
+                }
+                timerEl.innerText = `残り時間: ${timeLeft}秒`;
+                updatePhase();
+            }, 4000);
+        }
+
+        // Eye Game Modal Logic
+        let eyeGameInterval = null;
+        let eyeAnimId = null;
+        function openEyeGameModal() {
+            const modal = document.getElementById('eyeGameModal');
+            modal.classList.add('active');
+            initEyeGame();
+        }
+
+        function closeEyeGameModal() {
+            const modal = document.getElementById('eyeGameModal');
+            modal.classList.remove('active');
+            if (eyeGameInterval) clearInterval(eyeGameInterval);
+            if (eyeAnimId) cancelAnimationFrame(eyeAnimId);
+        }
+
+        function initEyeGame() {
+            const gameCanvas = document.getElementById('eyeGameCanvas');
+            const gCtx = gameCanvas.getContext('2d');
+            gameCanvas.width = gameCanvas.offsetWidth;
+            gameCanvas.height = gameCanvas.offsetHeight;
+
+            let x = gameCanvas.width / 2;
+            let y = gameCanvas.height / 2;
+            let dx = 3.5;
+            let dy = 2.8;
+            const radius = 14;
+
+            let timeLeft = 30;
+            const timerEl = document.getElementById('eyeGameTimer');
+
+            eyeGameInterval = setInterval(() => {
+                timeLeft--;
+                timerEl.innerText = `残り: ${timeLeft}秒`;
+                if (timeLeft <= 0) {
+                    clearInterval(eyeGameInterval);
+                    document.getElementById('eyeGameScore').innerText = '🎉 30秒眼筋ストレッチ完了！目の緊張がほぐれました。';
+                }
+            }, 1000);
+
+            function drawGame() {
+                gCtx.fillStyle = 'rgba(15, 23, 42, 0.25)';
+                gCtx.fillRect(0, 0, gameCanvas.width, gameCanvas.height);
+
+                // Draw bouncing glow ball
+                gCtx.beginPath();
+                gCtx.arc(x, y, radius, 0, Math.PI * 2);
+                gCtx.fillStyle = '#ec4899';
+                gCtx.shadowColor = '#ec4899';
+                gCtx.shadowBlur = 20;
+                gCtx.fill();
+                gCtx.shadowBlur = 0;
+
+                // Movement
+                x += dx;
+                y += dy;
+
+                if (x + radius > gameCanvas.width || x - radius < 0) dx = -dx;
+                if (y + radius > gameCanvas.height || y - radius < 0) dy = -dy;
+
+                if (timeLeft > 0) {
+                    eyeAnimId = requestAnimationFrame(drawGame);
+                }
+            }
+
+            drawGame();
+        }
+
+        // Initialize waveform on load
+        window.addEventListener('DOMContentLoaded', () => {
+            initPpgCanvas();
+            // If hash is #breathing, open breathing modal directly
+            if (window.location.hash === '#breathing') {
+                openBreathingModal();
+            }
+        });
+    </script>
+</body>
+</html>

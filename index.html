@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>CORE CONNECT Academy - ユース自律神経ウェルネス & セルフケア</title>
+    <!-- Link to the standard design system -->
+    <link rel="stylesheet" href="portal.css">
+    <style>
+        /* Additional SaaS / Academy Specific Styles */
+        .login-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px 16px;
+            background: radial-gradient(circle at 10% 20%, #e0f2fe 0%, #f8fafc 90%);
+        }
+
+        .login-card {
+            width: 100%;
+            max-width: 460px;
+            background: #ffffff;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 12px 35px -5px rgba(15, 23, 42, 0.1);
+            border-radius: 24px;
+            padding: 36px 30px;
+            transition: all 0.2s ease;
+        }
+
+        .login-logo {
+            text-align: center;
+            font-size: 24px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 6px;
+        }
+
+        .login-subtitle {
+            text-align: center;
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+            line-height: 1.5;
+        }
+
+        .preset-buttons {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+        }
+
+        .preset-btn {
+            flex: 1;
+            padding: 8px 10px;
+            background: #f1f5f9;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.15s ease;
+            white-space: nowrap;
+        }
+
+        .preset-btn:hover {
+            background: #e2e8f0;
+            color: var(--text-primary);
+            border-color: var(--accent-sky);
+        }
+
+        .login-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #0284c7 0%, #4f46e5 100%);
+            border: none;
+            border-radius: 9999px;
+            padding: 13px;
+            color: #ffffff;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-top: 10px;
+            box-shadow: 0 4px 14px rgba(2, 132, 199, 0.3);
+        }
+
+        .login-btn:hover {
+            opacity: 0.95;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 18px rgba(2, 132, 199, 0.4);
+        }
+
+        /* Academy Header Info */
+        .academy-header-info {
+            font-size: 12px;
+            color: var(--text-secondary);
+            background: #f1f5f9;
+            border: 1px solid var(--border-color);
+            padding: 6px 14px;
+            border-radius: 9999px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .student-badge {
+            background: #e0f2fe;
+            color: var(--accent-blue);
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+        }
+
+        /* Analytics Chart Container */
+        .analytics-chart-container {
+            height: 180px;
+            margin-top: 18px;
+            position: relative;
+            display: flex;
+            align-items: flex-end;
+            gap: 12px;
+            padding: 10px 10px 0;
+            border-bottom: 1px dashed var(--border-color);
+            box-sizing: border-box;
+        }
+
+        .trend-point {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            height: 100%;
+            justify-content: flex-end;
+        }
+
+        .trend-bar {
+            width: 24px;
+            border-radius: 6px 6px 0 0;
+            transition: height 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            cursor: pointer;
+        }
+
+        .trend-bar:hover::after {
+            content: attr(data-val);
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #0f172a;
+            color: #fff;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            white-space: nowrap;
+            z-index: 10;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .trend-date {
+            font-size: 10px;
+            color: var(--text-secondary);
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .empty-chart-state {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+            font-size: 12px;
+            text-align: center;
+            line-height: 1.6;
+        }
+
+        /* Condition Summary Grid */
+        .condition-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+            margin-top: 16px;
+        }
+
+        .condition-stat-box {
+            background: #f8fafc;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 14px 16px;
+        }
+
+        .condition-stat-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+        }
+
+        .condition-stat-val {
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--text-primary);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 1. Academy Student Login Section -->
+    <div class="login-container" id="loginSection">
+        <div class="login-card">
+            <div class="login-logo">
+                CORE CONNECT <span class="logo-badge">Academy</span>
+            </div>
+            <div class="login-subtitle">
+                高校生・大学生のための非接触自律神経ウェルネス<br>
+                <span style="font-size: 11px; color: var(--text-muted);">16歳〜22歳の心と身体のコンディショニング・孤立防止</span>
+            </div>
+
+            <!-- Demo Presets -->
+            <div style="font-size: 11px; font-weight: 700; color: var(--text-secondary); margin-bottom: 6px;">
+                🎯 デモ用ワンクリック切り替え:
+            </div>
+            <div class="preset-buttons">
+                <button type="button" class="preset-btn" onclick="applyPreset('highschool')">🎒 高校生(受験・部活)</button>
+                <button type="button" class="preset-btn" onclick="applyPreset('university')">🎓 大学生(就活・研究)</button>
+                <button type="button" class="preset-btn" onclick="applyPreset('athlete')">🏃 学生アスリート</button>
+            </div>
+
+            <form id="academyLoginForm" onsubmit="handleAcademyLogin(event)">
+                <div class="form-group">
+                    <label for="schoolCode">学校・教育機関コード</label>
+                    <input type="text" id="schoolCode" class="form-input" required value="ACAD-HS-01" placeholder="例: ACAD-HS-01">
+                </div>
+                <div class="form-group">
+                    <label for="schoolName">学校名</label>
+                    <input type="text" id="schoolName" class="form-input" required value="桜ヶ丘高等学校" placeholder="例: 桜ヶ丘高等学校">
+                </div>
+                <div class="form-group">
+                    <label for="studentId">学籍番号 / 生徒ID</label>
+                    <input type="text" id="studentId" class="form-input" required value="HS-2026-084" placeholder="例: HS-2026-084">
+                </div>
+                <div class="form-group">
+                    <label for="studentName">生徒・学生氏名</label>
+                    <input type="text" id="studentName" class="form-input" required value="佐藤 陽菜" placeholder="例: 佐藤 陽菜">
+                </div>
+                <div class="form-group">
+                    <label for="studentGrade">学年・専攻</label>
+                    <select id="studentGrade" class="form-input" required>
+                        <option value="高校1年生">高校1年生</option>
+                        <option value="高校2年生 (理系特進)" selected>高校2年生 (理系特進)</option>
+                        <option value="高校3年生 (大学受験生)">高校3年生 (大学受験生)</option>
+                        <option value="大学1年生">大学1年生 (新生活)</option>
+                        <option value="大学2年生">大学2年生</option>
+                        <option value="大学3年生 (就活準備)">大学3年生 (就活準備)</option>
+                        <option value="大学4年生 / 院生">大学4年生 / 院生 (卒論・研究)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="studentClub">所属部活動 / サークル（任意）</label>
+                    <input type="text" id="studentClub" class="form-input" value="吹奏楽部" placeholder="例: 陸上部, サッカー部, 軽音サークル, なし">
+                </div>
+                <button type="submit" class="login-btn">アカデミーにログイン</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 2. Academy Main Dashboard -->
+    <div id="portalSection" style="display: none;">
+        <!-- Header -->
+        <header>
+            <div class="logo">
+                CORE CONNECT <span class="logo-badge">Academy</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 14px;">
+                <div class="academy-header-info">
+                    <span class="student-badge" id="displaySchool">桜ヶ丘高等学校</span>
+                    <span class="student-badge" id="displayDept" style="background:#ede9fe; color:var(--accent-indigo);">高校2年生</span>
+                    <span id="displayName" style="font-weight: 700; color: var(--text-primary);">佐藤 陽菜 さん</span>
+                    <span style="color: var(--border-color);">|</span>
+                    <span id="displayStudentId" style="font-family: monospace; color: var(--text-muted);">HS-2026-084</span>
+                </div>
+                <button class="btn btn-secondary" style="padding: 6px 14px; font-size: 11px;" onclick="handleAcademyLogout()">ログアウト</button>
+            </div>
+        </header>
+
+        <!-- Main Workspace -->
+        <div class="main-container">
+            <!-- Left Panel -->
+            <div class="workspace-panel">
+                
+                <!-- Medical / Youth Advisor Card -->
+                <div class="glass-card" style="display: flex; gap: 16px; align-items: center; border-left: 4px solid var(--accent-sky);">
+                    <div style="width: 48px; height: 48px; border-radius: 50%; background: linear-gradient(135deg, #e0f2fe 0%, #ede9fe 100%); color: var(--accent-indigo); font-size: 15px; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                        EDU
+                    </div>
+                    <div>
+                        <div style="font-size: 10px; color: var(--accent-indigo); font-weight: 800; letter-spacing: 0.8px; text-transform: uppercase;">Youth Wellness & Medical Advisor</div>
+                        <div style="font-size: 14px; font-weight: 700; color: var(--text-primary); margin-top: 2px;">医学・思春期ヘルスケア監修：自律神経サポートチーム</div>
+                        <div style="font-size: 12px; color: var(--text-secondary); line-height: 1.5; margin-top: 4px;">
+                            「10代・20代前半は身体と心の急激な成長期であり、自律神経のバランスが揺らぎやすい多感な時期です。毎朝30秒のカメラ測定で自分の調子（RMSSD）を可視化し、無理のない勉強・部活リズムをつかみましょう。」
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 30-Second rPPG Scan CTA Card -->
+                <div class="glass-card" style="background: linear-gradient(135deg, #0284c7 0%, #3b82f6 50%, #6366f1 100%); color: #ffffff; padding: 28px 32px; border: none; box-shadow: 0 10px 25px rgba(2, 132, 199, 0.25);">
+                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap;">
+                        <div style="flex: 1; min-width: 260px;">
+                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                                <span style="background: rgba(255,255,255,0.2); backdrop-filter: blur(8px); font-size: 10px; padding: 3px 10px; border-radius: 9999px; font-weight: 700; letter-spacing: 0.5px;">非接触 rPPG スキャナー</span>
+                                <span style="font-size: 11px; opacity: 0.9;">AIカメラ測定</span>
+                            </div>
+                            <h2 style="font-size: 20px; font-weight: 800; line-height: 1.3; margin-bottom: 8px;">
+                                30秒でお顔から自律神経ストレスをチェック
+                            </h2>
+                            <p style="font-size: 12.5px; opacity: 0.9; line-height: 1.6; margin: 0;">
+                                お顔の血流の微細な輝度変化から心拍変動（RMSSD）を測定。朝の覚醒度、テスト・面接前の緊張度、部活のリカバリー状態を瞬時に解析します。
+                            </p>
+                        </div>
+                        <div>
+                            <button class="btn btn-pill" onclick="location.href='face_analyzer.html'" style="background: #ffffff; color: #0f172a; font-size: 14px; font-weight: 700; padding: 14px 32px; box-shadow: 0 4px 15px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 8px; cursor: pointer; border: none;">
+                                <span>30秒測定をスタート</span>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Latest Condition & Insights Card -->
+                <div class="glass-card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <div class="panel-title">
+                            <span>🌿 本日のコンディション状態</span>
+                        </div>
+                        <span id="latestConditionBadge" class="badge badge-green">良好</span>
+                    </div>
+
+                    <div id="conditionAdviceText" style="font-size: 13px; color: var(--text-secondary); background: #f8fafc; border-left: 3px solid var(--accent-green); padding: 12px 14px; border-radius: 8px; margin-bottom: 16px; line-height: 1.5;">
+                        ✨ <strong>自律神経バランスは絶好調です！</strong> 副交感神経がしっかり働き、回復力と集中力が高まっています。
+                    </div>
+
+                    <div class="condition-grid">
+                        <div class="condition-stat-box">
+                            <div class="condition-stat-label">自律神経スコア (RMSSD)</div>
+                            <div class="condition-stat-val" id="latestHrvScore" style="color: var(--accent-blue);">58 ms</div>
+                            <div style="font-size: 10px; color: var(--text-muted); margin-top: 2px;">青年期平均: 45〜65ms</div>
+                        </div>
+                        <div class="condition-stat-box">
+                            <div class="condition-stat-label">推定安静時心拍数</div>
+                            <div class="condition-stat-val" id="latestHrVal">66 bpm</div>
+                            <div style="font-size: 10px; color: var(--text-muted); margin-top: 2px;">安定ゾーン (60-80)</div>
+                        </div>
+                        <div class="condition-stat-box">
+                            <div class="condition-stat-label">朝の覚醒スイッチ度</div>
+                            <div class="condition-stat-val" style="color: var(--accent-indigo);">92%</div>
+                            <div style="font-size: 10px; color: var(--text-muted); margin-top: 2px;">スムーズな切り替え</div>
+                        </div>
+                        <div class="condition-stat-box">
+                            <div class="condition-stat-label">おすすめアクション</div>
+                            <div style="font-size: 13px; font-weight: 700; color: var(--text-primary); margin-top: 6px;">
+                                🎯 難問への挑戦・実力発揮
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Personal HRV Trend History Chart -->
+                <div class="glass-card">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div class="panel-title">
+                            <span>📈 自律神経トレンド履歴 (RMSSD推移)</span>
+                        </div>
+                        <span style="font-size: 11px; color: var(--text-muted);">直近の測定推移</span>
+                    </div>
+
+                    <div class="analytics-chart-container" id="hrvChart">
+                        <!-- Populated dynamically via JS -->
+                    </div>
+                    <div style="display: flex; justify-content: center; gap: 20px; margin-top: 14px; font-size: 11px; color: var(--text-secondary);">
+                        <span style="display: flex; align-items: center; gap: 6px;"><span style="width: 10px; height: 10px; border-radius: 2px; background: #34d399;"></span> 良好・充実 (55ms以上)</span>
+                        <span style="display: flex; align-items: center; gap: 6px;"><span style="width: 10px; height: 10px; border-radius: 2px; background: var(--accent-blue);"></span> 通常バランス (40-54ms)</span>
+                        <span style="display: flex; align-items: center; gap: 6px;"><span style="width: 10px; height: 10px; border-radius: 2px; background: var(--accent-orange);"></span> 要休息・過緊張 (39ms以下)</span>
+                    </div>
+                </div>
+
+                <!-- Youth Self-Care Articles & Columns -->
+                <div style="margin-top: 10px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <div style="font-size: 16px; font-weight: 800; color: var(--text-primary); display: flex; align-items: center; gap: 8px;">
+                            <span>💡 ユース・セルフケアガイド＆実践コラム</span>
+                        </div>
+                    </div>
+
+                    <!-- Category Tabs -->
+                    <div class="tab-container">
+                        <button class="tab-btn active" data-tab="study">集中・受験・就活</button>
+                        <button class="tab-btn" data-tab="sleep">起立性調節障害・睡眠</button>
+                        <button class="tab-btn" data-tab="sports">部活動・アスリート</button>
+                        <button class="tab-btn" data-tab="mental">SNS疲れ・孤立防止SOS</button>
+                    </div>
+
+                    <!-- Article Grid -->
+                    <div class="feed-grid" id="articleGrid">
+                        <!-- Populated dynamically via JS -->
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Right Panel -->
+            <div class="control-panel">
+                
+                <!-- Campus Counseling & SOS Card -->
+                <div class="glass-card" style="border: 1px solid rgba(79, 70, 229, 0.2); background: linear-gradient(180deg, #ffffff 0%, #f5f3ff 100%);">
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px;">
+                        <span style="font-size: 18px;">🤝</span>
+                        <div class="panel-title" style="color: var(--accent-indigo);">キャンパス相談室・保健室</div>
+                    </div>
+                    <div style="font-size: 12.5px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 16px;">
+                        「最近眠れない」「誰にも言えない不安がある」「勉強や進路で息が詰まる」など、些細なことでもお気軽にご相談ください。
+                    </div>
+                    <button class="btn btn-primary" onclick="openConsultModal()" style="width: 100%; border-radius: 9999px; background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); font-size: 12px; padding: 11px;">
+                        💬 相談室・カウンセラーに予約・相談
+                    </button>
+                </div>
+
+                <!-- 10-Second Quick Breathing Guide Button -->
+                <div class="glass-card" style="padding: 20px;">
+                    <div class="panel-title" style="margin-bottom: 8px;">
+                        <span>🫁 1分間リセット呼吸ガイド</span>
+                    </div>
+                    <div style="font-size: 12px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 14px;">
+                        試験前や面接直前に。画面の指示に合わせて呼吸を整え、過緊張をほぐします。
+                    </div>
+                    <button class="btn btn-secondary" onclick="location.href='face_analyzer.html#breathing'" style="width: 100%; font-size: 12px; border-radius: 9999px;">
+                        ▶ 呼吸トレーニングを起動
+                    </button>
+                </div>
+
+                <!-- Strict Privacy Card -->
+                <div class="glass-card" style="padding: 20px;">
+                    <div class="panel-title" style="margin-bottom: 8px; font-size: 13px;">
+                        <span>🛡️ 完全プライバシー保護ポリシー</span>
+                    </div>
+                    <div style="font-size: 11.5px; color: var(--text-secondary); line-height: 1.6;">
+                        本システムで測定された個人の生体データ（心拍数・HRV・ストレス値）は端末内で暗号化処理され、<strong>先生や保護者が特定の生徒の数値を無断で閲覧することはシステム上できません</strong>。<br>
+                        学校に提供されるのはクラス・学年単位の匿名統計データのみです。
+                    </div>
+                </div>
+
+                <!-- Admin Link Card -->
+                <div class="glass-card" style="padding: 20px;">
+                    <div class="panel-title" style="margin-bottom: 8px; font-size: 13px;">
+                        <span>🏫 教育関係者・保健室向けポータル</span>
+                    </div>
+                    <div style="font-size: 11.5px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 12px;">
+                        養護教諭・スクールカウンセラー・学年主任の方は、こちらから学年全体の匿名集計ダッシュボードにアクセスできます。
+                    </div>
+                    <button class="btn btn-secondary" onclick="location.href='admin.html'" style="width: 100%; font-size: 11px; border-radius: 9999px;">
+                        🏢 学校管理者ダッシュボード ➔
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Article Detail Modal -->
+    <div class="modal-overlay" id="articleModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeArticleModal()">&times;</button>
+            <span class="badge badge-blue" id="modalArticleBadge" style="margin-bottom: 12px;">集中・試験対策</span>
+            <h3 id="modalArticleTitle" style="font-size: 18px; font-weight: 800; color: var(--text-primary); margin-bottom: 16px; line-height: 1.4;">記事タイトル</h3>
+            <div id="modalArticleBody" style="font-size: 13.5px; color: var(--text-secondary); line-height: 1.7;">
+                <!-- Article Content -->
+            </div>
+            <div style="margin-top: 24px; text-align: center;">
+                <button class="btn btn-secondary" onclick="closeArticleModal()" style="border-radius: 9999px; padding: 8px 24px;">閉じる</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Consultation Request Modal -->
+    <div class="modal-overlay" id="consultModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeConsultModal()">&times;</button>
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+                <span style="font-size: 20px;">🤝</span>
+                <h3 style="font-size: 18px; font-weight: 800; color: var(--text-primary);">キャンパス相談室・予約フォーム</h3>
+            </div>
+            <p style="font-size: 12.5px; color: var(--text-secondary); margin-bottom: 20px; line-height: 1.5;">
+                スクールカウンセラーや養護教諭（保健室の先生）に相談リクエストを送信します。匿名でのメッセージ相談も可能です。
+            </p>
+            <form onsubmit="submitConsultRequest(event)">
+                <div class="form-group">
+                    <label for="consultType">相談内容のカテゴリ</label>
+                    <select id="consultType" class="form-input" required>
+                        <option value="勉強・進路・受験の不安">勉強・進路・受験の不安</option>
+                        <option value="朝起きられない・身体のだるさ・睡眠">朝起きられない・身体のだるさ・睡眠</option>
+                        <option value="友人関係・SNS疲れ・対人ストレス">友人関係・SNS疲れ・対人ストレス</option>
+                        <option value="部活動・スポーツのプレッシャー">部活動・スポーツのプレッシャー</option>
+                        <option value="なんとなくモヤモヤする（話を聞いてほしい）">なんとなくモヤモヤする（話を聞いてほしい）</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="consultMemo">相談したいこと・メモ（任意）</label>
+                    <textarea id="consultMemo" class="form-input" rows="4" placeholder="例: 最近朝起きるのがしんどくて学校に行きづらいです。少し話を聞いてほしいです。" style="resize: vertical;"></textarea>
+                </div>
+                <div class="form-group" style="display: flex; align-items: center; gap: 8px; margin-top: 10px;">
+                    <input type="checkbox" id="consultAnon" style="width: 16px; height: 16px; cursor: pointer;">
+                    <label for="consultAnon" style="margin: 0; font-size: 12px; cursor: pointer; color: var(--text-secondary);">
+                        匿名で送信する（名前や学籍番号を伏せて相談）
+                    </label>
+                </div>
+                <div style="display: flex; gap: 12px; margin-top: 24px;">
+                    <button type="button" class="btn btn-secondary" onclick="closeConsultModal()" style="flex: 1; border-radius: 9999px;">キャンセル</button>
+                    <button type="submit" class="btn btn-primary" style="flex: 2; border-radius: 9999px;">リクエストを送信する</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Script loading -->
+    <script src="portal.js"></script>
+</body>
+</html>
