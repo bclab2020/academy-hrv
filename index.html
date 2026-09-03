@@ -276,6 +276,104 @@
                 font-size: 18px;
             }
         }
+
+        /* Fullscreen Actions Styles */
+        .breathing-container {
+            text-align: center;
+            padding: 20px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+        }
+
+        .breath-circle {
+            width: 250px;
+            height: 250px;
+            border-radius: 50%;
+            background: radial-gradient(circle, #38bdf8 0%, #4f46e5 100%);
+            margin: 30px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            font-size: 26px;
+            font-weight: 800;
+            box-shadow: 0 0 60px rgba(56, 189, 248, 0.5);
+            transition: transform 4s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 4s ease;
+        }
+
+        .breath-circle.expand {
+            transform: scale(1.35);
+            box-shadow: 0 0 90px rgba(56, 189, 248, 0.85);
+        }
+
+        .breath-circle.contract {
+            transform: scale(0.8);
+            box-shadow: 0 0 30px rgba(56, 189, 248, 0.3);
+        }
+
+        #eyeGameCanvas {
+            width: 92vw;
+            max-width: 1100px;
+            height: calc(100vh - 230px);
+            min-height: 280px;
+            max-height: 620px;
+            background: radial-gradient(circle at 50% 50%, #0f172a 0%, #020617 100%);
+            border: 2px solid rgba(236, 72, 153, 0.3);
+            border-radius: 20px;
+            margin-top: 14px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+        }
+
+        .stretch-step-box {
+            background: rgba(30, 41, 59, 0.7);
+            border: 1.5px solid rgba(255, 255, 255, 0.15);
+            border-radius: 20px;
+            padding: 28px 24px;
+            text-align: center;
+            margin: 20px auto;
+            max-width: 720px;
+            width: 90vw;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            color: #ffffff;
+        }
+
+        .stretch-step-box.active {
+            border-color: var(--accent-sky);
+            background: rgba(14, 165, 233, 0.12);
+            box-shadow: 0 8px 30px rgba(56, 189, 248, 0.25);
+        }
+
+        .stretch-anim-icon {
+            font-size: 64px;
+            margin-bottom: 12px;
+            display: inline-block;
+            animation: bounceSoft 2s infinite ease-in-out;
+        }
+
+        @keyframes bounceSoft {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 9999px;
+            overflow: hidden;
+            margin: 12px 0;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #38bdf8, #4f46e5);
+            width: 0%;
+            transition: width 0.3s linear;
+        }
     </style>
 </head>
 <body>
@@ -544,17 +642,17 @@
                         測定スコアやお好みに合わせて、いつでも自律神経と血流をリセットできます。
                     </div>
                     <div style="display: flex; flex-direction: column; gap: 8px;">
-                        <button class="btn btn-secondary" onclick="location.href='face_analyzer.html#breathing'" style="width: 100%; font-size: 11.5px; border-radius: 9999px; text-align: left; padding: 8px 14px; display: flex; justify-content: space-between; align-items: center;">
+                        <button class="btn btn-secondary" onclick="openBreathingModal()" style="width: 100%; font-size: 11.5px; border-radius: 9999px; text-align: left; padding: 8px 14px; display: flex; justify-content: space-between; align-items: center;">
                             <span>🫁 1分間 4秒ボックス呼吸</span>
-                            <span>▶</span>
+                            <span>▶ 開始</span>
                         </button>
-                        <button class="btn btn-secondary" onclick="location.href='face_analyzer.html#eye'" style="width: 100%; font-size: 11.5px; border-radius: 9999px; text-align: left; padding: 8px 14px; display: flex; justify-content: space-between; align-items: center;">
+                        <button class="btn btn-secondary" onclick="openEyeGameModal()" style="width: 100%; font-size: 11.5px; border-radius: 9999px; text-align: left; padding: 8px 14px; display: flex; justify-content: space-between; align-items: center;">
                             <span>👀 30秒 アイトレーニング</span>
-                            <span>▶</span>
+                            <span>▶ 遊ぶ</span>
                         </button>
-                        <button class="btn btn-secondary" onclick="location.href='face_analyzer.html#stretch'" style="width: 100%; font-size: 11.5px; border-radius: 9999px; text-align: left; padding: 8px 14px; display: flex; justify-content: space-between; align-items: center;">
+                        <button class="btn btn-secondary" onclick="openStretchModal()" style="width: 100%; font-size: 11.5px; border-radius: 9999px; text-align: left; padding: 8px 14px; display: flex; justify-content: space-between; align-items: center;">
                             <span>🧘 1分間 肩甲骨・首肩ストレッチ</span>
-                            <span>▶</span>
+                            <span>▶ 開始</span>
                         </button>
                     </div>
                 </div>
@@ -743,6 +841,92 @@
 
             <div style="margin-top: 18px; text-align: center;">
                 <button class="btn btn-secondary" onclick="closeLogicModal()" style="border-radius: 9999px; padding: 8px 32px;">閉じる</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Breathing Modal (Fullscreen Immersive) -->
+    <div class="modal-overlay modal-fullscreen" id="breathingModal">
+        <div class="modal-content" style="text-align: center;">
+            <button class="modal-close" onclick="closeBreathingModal()">&times;</button>
+            
+            <div style="margin-top: 10px;">
+                <span class="badge badge-indigo" style="font-size: 12px; padding: 4px 12px; margin-bottom: 8px;">自律神経リセット呼吸法</span>
+                <h2 style="font-size: 24px; font-weight: 800; color: #ffffff; letter-spacing: -0.5px;">4秒ボックス呼吸 (Box Breathing)</h2>
+                <p style="font-size: 13px; color: #94a3b8; margin-top: 4px;">円の拡大・縮小に合わせて、ゆっくり深く呼吸しましょう</p>
+            </div>
+
+            <div class="breathing-container">
+                <div class="breath-circle" id="breathCircle">
+                    <span id="breathPhaseText">吸って (4s)</span>
+                </div>
+                <div id="breathTimer" style="font-size: 18px; font-weight: 800; color: #38bdf8; letter-spacing: 0.5px;">残り時間: 60秒</div>
+            </div>
+
+            <div style="margin-bottom: 10px;">
+                <button class="btn btn-secondary" onclick="closeBreathingModal()" style="border-radius: 9999px; padding: 10px 36px; font-size: 13px; background: rgba(255,255,255,0.15); color: #fff; border: 1px solid rgba(255,255,255,0.25);">終了する</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Eye Game Modal (Fullscreen Immersive) -->
+    <div class="modal-overlay modal-fullscreen" id="eyeGameModal">
+        <div class="modal-content" style="text-align: center;">
+            <button class="modal-close" onclick="closeEyeGameModal()">&times;</button>
+            
+            <div style="margin-top: 6px;">
+                <span class="badge badge-pink" style="font-size: 12px; padding: 4px 12px; margin-bottom: 6px;">眼筋ストレッチ & 脳覚醒</span>
+                <h2 style="font-size: 24px; font-weight: 800; color: #ffffff; letter-spacing: -0.5px;">30秒アイトレーニングゲーム</h2>
+                <p style="font-size: 13px; color: #94a3b8; margin-top: 4px;">頭を動かさず、画面全体を飛び回る光のターゲットを目だけで追ってください！</p>
+            </div>
+
+            <canvas id="eyeGameCanvas"></canvas>
+
+            <div style="width: 90vw; max-width: 1100px; display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+                <span id="eyeGameScore" style="font-size: 14px; font-weight: 700; color: #f472b6;">🎯 ターゲット追従中...</span>
+                <span id="eyeGameTimer" style="font-size: 16px; font-weight: 800; color: #38bdf8;">残り: 30秒</span>
+            </div>
+
+            <div style="margin-top: 12px; margin-bottom: 8px;">
+                <button class="btn btn-secondary" onclick="closeEyeGameModal()" style="border-radius: 9999px; padding: 10px 36px; font-size: 13px; background: rgba(255,255,255,0.15); color: #fff; border: 1px solid rgba(255,255,255,0.25);">終了</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Shoulder & Neck Stretch Guide Modal (Fullscreen Immersive) -->
+    <div class="modal-overlay modal-fullscreen" id="stretchModal">
+        <div class="modal-content" style="text-align: center;">
+            <button class="modal-close" onclick="closeStretchModal()">&times;</button>
+            
+            <div style="margin-top: 10px;">
+                <span class="badge badge-green" style="font-size: 12px; padding: 4px 12px; margin-bottom: 8px;">起立性血流改善・姿勢リセット</span>
+                <h2 style="font-size: 24px; font-weight: 800; color: #ffffff; letter-spacing: -0.5px;">1分間 肩甲骨・首肩リフレッシュストレッチ</h2>
+                <p style="font-size: 13px; color: #94a3b8; margin-top: 4px;">椅子に座ったまま、画面のガイドに合わせてゆっくり筋肉を伸ばしましょう</p>
+            </div>
+
+            <div style="flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%;">
+                <div class="progress-bar-container" style="max-width: 720px; width: 90vw; height: 10px; background: rgba(255,255,255,0.15); margin: 16px 0;">
+                    <div class="progress-bar-fill" id="stretchProgress"></div>
+                </div>
+
+                <!-- Stretch Step Display -->
+                <div class="stretch-step-box active" id="stretchStepBox">
+                    <div class="stretch-anim-icon" id="stretchIcon">🔄</div>
+                    <h3 id="stretchStepTitle" style="font-size: 22px; font-weight: 800; color: #ffffff; margin: 0 0 10px 0;">
+                        Step 1: 肩甲骨ぐるぐる回し (20秒)
+                    </h3>
+                    <p id="stretchStepDesc" style="font-size: 15px; color: #cbd5e1; line-height: 1.6; margin: 0;">
+                        両手を肩に乗せ、肘で大きな円を描くように後ろへゆっくり回します。<br>胸を開いて深く息を吸いましょう。
+                    </p>
+                </div>
+
+                <div id="stretchTimerText" style="font-size: 20px; font-weight: 800; color: #38bdf8; margin: 12px 0;">
+                    残り時間: 60秒
+                </div>
+            </div>
+
+            <div style="margin-bottom: 10px;">
+                <button class="btn btn-secondary" onclick="closeStretchModal()" style="border-radius: 9999px; padding: 10px 36px; font-size: 13px; background: rgba(255,255,255,0.15); color: #fff; border: 1px solid rgba(255,255,255,0.25);">終了する</button>
             </div>
         </div>
     </div>

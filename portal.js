@@ -414,6 +414,203 @@ window.submitConsultRequest = function(event) {
     const memo = document.getElementById('consultMemo').value;
     const isAnon = document.getElementById('consultAnon').checked;
     
+    alert(`✅ ご相談リクエストを受け付けました。\n相談種別: ${type}\n${isAnon ? '（匿名相談モード）' : ''}\n\nスクールカウンセラー・保健室教諭から追ってご連絡いたします。`);
+    closeConsultModal();
+};
+
+// ==========================================
+// Fullscreen Action Modals (Breathing, Eye, Stretch)
+// ==========================================
+
+// 1. Breathing Modal Logic
+let portalBreathInterval = null;
+window.openBreathingModal = function() {
+    const modal = document.getElementById('breathingModal');
+    if (!modal) return;
+    modal.classList.add('active');
+    
+    const circle = document.getElementById('breathCircle');
+    const phaseText = document.getElementById('breathPhaseText');
+    const timerEl = document.getElementById('breathTimer');
+    
+    let timeLeft = 60;
+    let step = 0;
+    
+    function updatePhase() {
+        if (!circle || !phaseText) return;
+        if (step === 0) {
+            circle.className = 'breath-circle expand';
+            phaseText.innerText = '吸って (4s)';
+        } else if (step === 1) {
+            circle.className = 'breath-circle expand';
+            phaseText.innerText = '止めて (4s)';
+        } else if (step === 2) {
+            circle.className = 'breath-circle contract';
+            phaseText.innerText = '吐いて (4s)';
+        } else if (step === 3) {
+            circle.className = 'breath-circle contract';
+            phaseText.innerText = '止めて (4s)';
+        }
+        step = (step + 1) % 4;
+    }
+
+    updatePhase();
+    if (portalBreathInterval) clearInterval(portalBreathInterval);
+    portalBreathInterval = setInterval(() => {
+        timeLeft -= 4;
+        if (timeLeft <= 0) {
+            clearInterval(portalBreathInterval);
+            if (timerEl) timerEl.innerText = '✨ 1分間完了！自律神経が整いました。';
+            if (phaseText) phaseText.innerText = '完了！';
+            return;
+        }
+        if (timerEl) timerEl.innerText = `残り時間: ${timeLeft}秒`;
+        updatePhase();
+    }, 4000);
+};
+
+window.closeBreathingModal = function() {
+    const modal = document.getElementById('breathingModal');
+    if (modal) modal.classList.remove('active');
+    if (portalBreathInterval) clearInterval(portalBreathInterval);
+};
+
+// 2. Eye Game Modal Logic
+let portalEyeInterval = null;
+let portalEyeAnimId = null;
+window.openEyeGameModal = function() {
+    const modal = document.getElementById('eyeGameModal');
+    if (!modal) return;
+    modal.classList.add('active');
+    
+    const gameCanvas = document.getElementById('eyeGameCanvas');
+    if (!gameCanvas) return;
+    const gCtx = gameCanvas.getContext('2d');
+    
+    setTimeout(() => {
+        gameCanvas.width = gameCanvas.clientWidth || window.innerWidth * 0.9;
+        gameCanvas.height = gameCanvas.clientHeight || (window.innerHeight - 240);
+
+        let x = gameCanvas.width / 2;
+        let y = gameCanvas.height / 2;
+        let speed = Math.max(4.5, gameCanvas.width / 180);
+        let dx = speed;
+        let dy = speed * 0.8;
+        const radius = Math.max(16, gameCanvas.width / 50);
+
+        let timeLeft = 30;
+        const timerEl = document.getElementById('eyeGameTimer');
+        const scoreEl = document.getElementById('eyeGameScore');
+        if (scoreEl) scoreEl.innerText = '🎯 ターゲット追従中... (頭を動かさず目だけで追う)';
+
+        if (portalEyeInterval) clearInterval(portalEyeInterval);
+        portalEyeInterval = setInterval(() => {
+            timeLeft--;
+            if (timerEl) timerEl.innerText = `残り: ${timeLeft}秒`;
+            if (timeLeft <= 0) {
+                clearInterval(portalEyeInterval);
+                if (scoreEl) scoreEl.innerText = '🎉 30秒眼筋ストレッチ完了！視野と脳の緊張がほぐれました。';
+            }
+        }, 1000);
+
+        function drawGame() {
+            gCtx.fillStyle = 'rgba(15, 23, 42, 0.22)';
+            gCtx.fillRect(0, 0, gameCanvas.width, gameCanvas.height);
+
+            // Ambient trail
+            gCtx.beginPath();
+            gCtx.arc(x, y, radius, 0, Math.PI * 2);
+            gCtx.fillStyle = '#ec4899';
+            gCtx.shadowColor = '#f472b6';
+            gCtx.shadowBlur = 30;
+            gCtx.fill();
+            gCtx.shadowBlur = 0;
+
+            // Inner core
+            gCtx.beginPath();
+            gCtx.arc(x, y, radius * 0.4, 0, Math.PI * 2);
+            gCtx.fillStyle = '#ffffff';
+            gCtx.fill();
+
+            x += dx;
+            y += dy;
+
+            if (x + radius > gameCanvas.width || x - radius < 0) dx = -dx;
+            if (y + radius > gameCanvas.height || y - radius < 0) dy = -dy;
+
+            if (timeLeft > 0) {
+                portalEyeAnimId = requestAnimationFrame(drawGame);
+            }
+        }
+
+        drawGame();
+    }, 100);
+};
+
+window.closeEyeGameModal = function() {
+    const modal = document.getElementById('eyeGameModal');
+    if (modal) modal.classList.remove('active');
+    if (portalEyeInterval) clearInterval(portalEyeInterval);
+    if (portalEyeAnimId) cancelAnimationFrame(portalEyeAnimId);
+};
+
+// 3. Stretch Modal Logic
+let portalStretchInterval = null;
+window.openStretchModal = function() {
+    const modal = document.getElementById('stretchModal');
+    if (!modal) return;
+    modal.classList.add('active');
+    
+    let timeLeft = 60;
+    const timerEl = document.getElementById('stretchTimerText');
+    const iconEl = document.getElementById('stretchIcon');
+    const titleEl = document.getElementById('stretchStepTitle');
+    const descEl = document.getElementById('stretchStepDesc');
+    const progressEl = document.getElementById('stretchProgress');
+
+    function updateStep(sec) {
+        if (!progressEl) return;
+        const progress = ((60 - sec) / 60) * 100;
+        progressEl.style.width = `${progress}%`;
+
+        if (sec > 40) {
+            iconEl.innerText = "🔄";
+            titleEl.innerText = "Step 1: 肩甲骨ぐるぐる回し (20秒)";
+            descEl.innerHTML = "両手を肩に乗せ、肘で大きな円を描くように後ろへゆっくり回します。<br>胸郭を開いて深く息を吸いましょう。";
+        } else if (sec > 20) {
+            iconEl.innerText = "💆";
+            titleEl.innerText = "Step 2: 首すじ・側頭部ストレッチ (20秒)";
+            descEl.innerHTML = "頭をゆっくり左へ倒し、右の首すじを心地よく伸ばします（10秒で反対側へ）。<br>脳への血流ルート（椎骨動脈）の緊張を解放します。";
+        } else {
+            iconEl.innerText = "🙆";
+            titleEl.innerText = "Step 3: 両手を組んでぐ〜っと背伸び (20秒)";
+            descEl.innerHTML = "頭上で両手を組み、手のひらを上に向けて天井へ背伸びします。<br>息を吐きながら身体を左右に軽く揺らしましょう。";
+        }
+        if (timerEl) timerEl.innerText = `残り時間: ${sec}秒`;
+    }
+
+    updateStep(timeLeft);
+    if (portalStretchInterval) clearInterval(portalStretchInterval);
+    portalStretchInterval = setInterval(() => {
+        timeLeft--;
+        updateStep(timeLeft);
+
+        if (timeLeft <= 0) {
+            clearInterval(portalStretchInterval);
+            if (progressEl) progressEl.style.width = "100%";
+            if (iconEl) iconEl.innerText = "✨";
+            if (titleEl) titleEl.innerText = "🎉 1分間ストレッチ完了！";
+            if (descEl) descEl.innerHTML = "肩甲骨と首の緊張がほぐれ、脳と全身への血流がスムーズになりました！";
+            if (timerEl) timerEl.innerText = "リフレッシュ完了！";
+        }
+    }, 1000);
+};
+
+window.closeStretchModal = function() {
+    const modal = document.getElementById('stretchModal');
+    if (modal) modal.classList.remove('active');
+    if (portalStretchInterval) clearInterval(portalStretchInterval);
+};
     alert(`【相談リクエスト送信完了】\n\nご希望: ${type}\n匿名希望: ${isAnon ? 'はい（統計IDのみ送信）' : 'いいえ（学籍番号を連携）'}\n\nスクールカウンセラー・保健室スタッフに通知が届きました。安心して学校生活をお過ごしください。`);
     closeConsultModal();
 };
