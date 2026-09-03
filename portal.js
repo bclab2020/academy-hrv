@@ -678,7 +678,8 @@ window.closeStretchModal = function() {
 // ==========================================
 // ==========================================
 // ==========================================
-// 4-Panel Manga Comic Theater System (Clean High-Contrast 2-Column UI)
+// ==========================================
+// 4-Panel Manga Comic Theater System (Manga-First Hero UI)
 // ==========================================
 const mangaData = {
     neck: {
@@ -790,18 +791,18 @@ window.renderManga = function(category) {
     const titleEl = document.getElementById('mangaModalTitle');
     if (titleEl) titleEl.innerText = data.title;
 
-    // Render Clean High-Contrast 2-Column Theater Layout
+    // Render Manga-First Hero Layout
     const contentContainer = document.getElementById('mangaTheaterContent');
     if (contentContainer) {
         contentContainer.innerHTML = `
-            <div class="manga-main-layout">
-                <!-- Left: Manga Strip Viewer -->
-                <div class="manga-viewer-col">
+            <div style="display: flex; flex-direction: column; align-items: center; width: 100%;">
+                <!-- 1. Hero 4-Panel Comic Strip (Large, 100% Top-Visible) -->
+                <div class="manga-hero-frame">
                     <img src="${data.image}" alt="${data.title}">
                 </div>
 
-                <!-- Right: Medical Insight & Action Center -->
-                <div class="manga-side-panel">
+                <!-- 2. Medical Insight & Action Center (Flows naturally after comic) -->
+                <div class="manga-content-flow">
                     <!-- Medical Insight Card -->
                     <div class="manga-info-card">
                         <div class="manga-info-title">${data.medicalTitle}</div>
@@ -826,14 +827,14 @@ window.renderManga = function(category) {
                         <div style="display: flex; align-items: center; gap: 14px; text-align: left;">
                             <div style="font-size: 34px;" id="mangaTimerIcon">💆</div>
                             <div style="flex: 1;">
-                                <div id="mangaTimerTitle" style="font-size: 14.5px; font-weight: 800; color: #ffffff; margin-bottom: 2px;">
+                                <div id="mangaTimerTitle" style="font-size: 15px; font-weight: 800; color: #ffffff; margin-bottom: 2px;">
                                     Step 1: 首すじ・側頭部伸ばし (左右各10秒)
                                 </div>
-                                <div id="mangaTimerDesc" style="font-size: 12px; color: #cbd5e1; line-height: 1.45;">
+                                <div id="mangaTimerDesc" style="font-size: 12.5px; color: #cbd5e1; line-height: 1.45;">
                                     背筋を伸ばし、頭をゆっくり横へ倒して首すじを心地よく伸ばします。
                                 </div>
                             </div>
-                            <div id="mangaTimerText" style="font-size: 16px; font-weight: 900; color: #38bdf8; white-space: nowrap;">
+                            <div id="mangaTimerText" style="font-size: 17px; font-weight: 900; color: #38bdf8; white-space: nowrap;">
                                 残り: 60秒
                             </div>
                         </div>
@@ -841,6 +842,12 @@ window.renderManga = function(category) {
                 </div>
             </div>
         `;
+    }
+
+    // Scroll to the very top so Panel 1 is 100% visible immediately
+    const bodyEl = document.querySelector('.manga-theater-body');
+    if (bodyEl) {
+        bodyEl.scrollTop = 0;
     }
 };
 
@@ -898,4 +905,7 @@ window.startMangaInlineTimer = function(category) {
             if (timeTextEl) timeTextEl.innerText = '完了！';
         }
     }, 1000);
+
+    // Smooth scroll down to timer
+    timerSec.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 };
