@@ -676,12 +676,18 @@ window.closeStretchModal = function() {
 };
 
 // ==========================================
-// 4-Panel Manga Comic System (4コマ漫画セルフケア)
+// ==========================================
+// 4-Panel Manga Comic Theater System (2-Column Architecture)
 // ==========================================
 const mangaData = {
     neck: {
         title: "首凝り・スマホ首編「頭が20kg！？スマホ首の悲劇」",
         image: "images/manga_neck.jpg",
+        badge: "📱 首凝り・スマホ首",
+        medicalTitle: "💡 久保医師の医学解説：頭が傾くと首に20kgの負荷！",
+        medicalDesc: "頭は約5kg（ボーリング球1個分）の重さがあります。頭が前に約60度傾くと、頸椎にかかる負荷はなんと<strong>約20kg</strong>に急増！首の後ろの筋肉（僧帽筋・頭板状筋）が緊張し、脳へ血液を送る椎骨動脈が圧迫されて集中力低下や頭痛を引き起こします。",
+        solutionTitle: "✨ 対策：あご引き＆側頭部ストレッチ",
+        solutionDesc: "背筋を伸ばし、人差し指であごを後ろへ引く「チンタック」と、頭をゆっくり横へ倒すストレッチで首すじの緊張をリセットしましょう。",
         actionBtnText: "💆 1分間 首すじ＆あご引きストレッチを開始 ➔",
         timerSteps: [
             { sec: 20, icon: "💆", title: "Step 1: 首すじ・側頭部伸ばし (左右各10秒)", desc: "背筋を伸ばし、頭をゆっくり横へ倒して首すじを心地よく伸ばします。" },
@@ -692,6 +698,11 @@ const mangaData = {
     back: {
         title: "巻き肩・背中バキバキ編「猫背で呼吸が止まりそう！？」",
         image: "images/manga_back.jpg",
+        badge: "🎒 巻き肩・背中痛",
+        medicalTitle: "💡 久保医師の医学解説：猫背は「脳の酸欠」を招く！",
+        medicalDesc: "重いリュックや机での前かがみ姿勢が続くと、肩甲骨が外側に開き、胸郭（肋骨）の動きがロックされます。これにより<strong>肺が十分に膨らまず浅い呼吸</strong>になり、脳への酸素供給量が落ちて猛烈な眠気と集中力低下の原因になります。",
+        solutionTitle: "✨ 対策：肩甲骨はがし＆胸郭オープン",
+        solutionDesc: "両手を肩に乗せて肘で大きな円を描き、肩甲骨を動かすことで肋骨が開き、深い呼吸ができるようになります。",
         actionBtnText: "🔄 1分間 肩甲骨はがしストレッチを開始 ➔",
         timerSteps: [
             { sec: 20, icon: "🔄", title: "Step 1: 肩甲骨ぐるぐる回し (20秒)", desc: "両手を肩にチョンと乗せ、肘で大きな円を描くように後ろへゆっくり回します。" },
@@ -702,6 +713,11 @@ const mangaData = {
     waist: {
         title: "座りっぱなし腰痛編「学校の椅子、硬すぎ問題」",
         image: "images/manga_waist.jpg",
+        badge: "🪑 座りっぱなし腰痛",
+        medicalTitle: "💡 久保医師の医学解説：骨盤後傾でお尻の奥が圧迫！",
+        medicalDesc: "学校の硬い椅子で何時間も座りっぱなしになると、骨盤が後ろに倒れて<strong>お尻の奥の筋肉（梨状筋）や大臀筋が圧迫</strong>されます。骨盤のクッション機能が失われ、上半身の全体重が腰椎に集中して腰痛を引き起こします。",
+        solutionTitle: "✨ 対策：椅子で座ったまま4の字お尻伸ばし",
+        solutionDesc: "片足の足首を反対の膝の上に乗せ、背筋を伸ばしたまま体を前に倒すだけで、固まったお尻の奥が気持ちよく伸びます。",
         actionBtnText: "🧘 1分間 椅子お尻＆骨盤ストレッチを開始 ➔",
         timerSteps: [
             { sec: 30, icon: "🦵", title: "Step 1: 椅子で4の字・お尻伸ばし (左右各15秒)", desc: "椅子の上で片足を反対の膝に乗せ、背筋を伸ばしたまま体を前に倒します。" },
@@ -712,6 +728,11 @@ const mangaData = {
     morning: {
         title: "朝起きられない起立性編「アラーム5個でも無理…」",
         image: "images/manga_morning.jpg",
+        badge: "⏰ 朝起きられないOD",
+        medicalTitle: "💡 久保医師の医学解説：血液が脳に届かない起立性の乱れ！",
+        medicalDesc: "朝起きられないのは根性不足ではなく、<strong>自律神経の血圧調整の遅れ（起立性調節障害・OD傾向）</strong>です。睡眠中に下半身に溜まった血液が、起き上がる時に脳へ素早く押し上げられず、立ちくらみや強いだるさが生じます。",
+        solutionTitle: "✨ 対策：布団の中で足首パタパタ筋ポンプ！",
+        solutionDesc: "いきなり立ち上がらず、布団の中で足首を上下に20回動かして「ふくらはぎの筋肉ポンプ」を発動させ、血流を脳へ送り届けましょう。",
         actionBtnText: "🦶 1分間 朝の血流ポンプ運動を開始 ➔",
         timerSteps: [
             { sec: 20, icon: "🦶", title: "Step 1: 布団の中で足首パタパタ (20秒)", desc: "足首を手前と奥にリズミカルに動かし、ふくらはぎの筋ポンプを発動！" },
@@ -722,6 +743,11 @@ const mangaData = {
     exam: {
         title: "試験前パニック・過緊張編「心臓バクバクで頭真っ白！」",
         image: "images/manga_exam.jpg",
+        badge: "📝 試験前パニック",
+        medicalTitle: "💡 久保医師の医学解説：交感神経の暴走で前頭前野がフリーズ！",
+        medicalDesc: "強いプレッシャーがかかると交感神経が急上昇し、脈拍が早くなります。脳の論理的思考エリア（前頭前野）への血流が阻害され、<strong>覚えたはずの公式や英単語が思い出せなくなる「頭が真っ白」現象</strong>が起きます。",
+        solutionTitle: "✨ 対策：4秒ボックス呼吸（Box Breathing）",
+        solutionDesc: "「4秒吸う ➔ 4秒止める ➔ 4秒吐く ➔ 4秒止める」を数回繰り返すだけで、副交感神経（迷走神経）が強制的にオンになり、心拍が安定してゾーンに入れます。",
         actionBtnText: "🫁 1分間 4秒ボックス呼吸を開始 ➔",
         timerSteps: [
             { sec: 15, icon: "🫁", title: "Cycle 1: 4秒吸う ➔ 4秒止める ➔ 4秒吐く ➔ 4秒止める", desc: "目を閉じて、心拍の落ち着きに意識を集中しましょう。" },
@@ -746,8 +772,6 @@ window.closeMangaModal = function() {
     const modal = document.getElementById('mangaModal');
     if (modal) modal.classList.remove('active');
     if (mangaTimerInterval) clearInterval(mangaTimerInterval);
-    const timerSec = document.getElementById('mangaTimerSection');
-    if (timerSec) timerSec.style.display = 'none';
 };
 
 window.renderManga = function(category) {
@@ -756,8 +780,6 @@ window.renderManga = function(category) {
     if (!data) return;
 
     if (mangaTimerInterval) clearInterval(mangaTimerInterval);
-    const timerSec = document.getElementById('mangaTimerSection');
-    if (timerSec) timerSec.style.display = 'none';
 
     // Update active tab buttons
     document.querySelectorAll('.manga-tab-btn').forEach(btn => {
@@ -767,20 +789,57 @@ window.renderManga = function(category) {
     const titleEl = document.getElementById('mangaModalTitle');
     if (titleEl) titleEl.innerText = data.title;
 
-    const grid = document.getElementById('mangaGrid');
-    if (!grid) return;
-    grid.innerHTML = `
-        <div style="width: 100%; display: flex; justify-content: center; align-items: center; background: #ffffff; border: 3px solid #0f172a; border-radius: 18px; padding: 10px; box-shadow: 6px 6px 0 #0f172a; max-width: 520px; margin: 0 auto;">
-            <img src="${data.image}" alt="${data.title}" style="width: 100%; max-width: 480px; height: auto; border-radius: 12px; display: block; filter: contrast(1.03);">
-        </div>
-    `;
+    // Render 2-Column Theater Layout
+    const contentContainer = document.getElementById('mangaTheaterContent');
+    if (contentContainer) {
+        contentContainer.innerHTML = `
+            <div class="manga-main-layout">
+                <!-- Left: Manga Strip Viewer -->
+                <div class="manga-viewer-col">
+                    <img src="${data.image}" alt="${data.title}">
+                </div>
 
-    const actionBtn = document.getElementById('mangaActionBtn');
-    if (actionBtn) {
-        actionBtn.innerText = data.actionBtnText;
-        actionBtn.onclick = () => {
-            startMangaInlineTimer(category);
-        };
+                <!-- Right: Medical Insight & Action Center -->
+                <div class="manga-side-panel">
+                    <!-- Medical Insight Card -->
+                    <div class="manga-info-card">
+                        <div class="manga-info-title">${data.medicalTitle}</div>
+                        <div class="manga-info-desc">${data.medicalDesc}</div>
+                        <div style="margin-top: 14px; padding-top: 12px; border-top: 1px dashed rgba(255,255,255,0.2);">
+                            <div style="font-size: 13.5px; font-weight: 800; color: #34d399; margin-bottom: 4px;">${data.solutionTitle}</div>
+                            <div style="font-size: 12px; color: #cbd5e1; line-height: 1.55;">${data.solutionDesc}</div>
+                        </div>
+                    </div>
+
+                    <!-- Action Trigger Button -->
+                    <button type="button" class="btn btn-primary" id="mangaActionBtn" onclick="startMangaInlineTimer('${category}')" style="width: 100%; border-radius: 9999px; padding: 15px 24px; font-size: 15px; font-weight: 800; background: linear-gradient(135deg, #0284c7, #4f46e5); box-shadow: 0 4px 20px rgba(2, 132, 199, 0.4); cursor: pointer; border: none; color: #fff;">
+                        ${data.actionBtnText}
+                    </button>
+
+                    <!-- Inline Live Timer Container -->
+                    <div id="mangaTimerSection" style="display: none; background: rgba(15, 23, 42, 0.95); border: 2px solid #38bdf8; border-radius: 18px; padding: 18px 20px; box-shadow: 0 0 25px rgba(56, 189, 248, 0.25);">
+                        <div class="progress-bar-container" style="width: 100%; height: 8px; background: rgba(255,255,255,0.15); margin-bottom: 12px; border-radius:9999px;">
+                            <div class="progress-bar-fill" id="mangaTimerProgress" style="width: 0%; height:100%; background: linear-gradient(90deg, #38bdf8, #818cf8); border-radius:9999px; transition: width 0.3s linear;"></div>
+                        </div>
+
+                        <div style="display: flex; align-items: center; gap: 14px; text-align: left;">
+                            <div style="font-size: 34px;" id="mangaTimerIcon">💆</div>
+                            <div style="flex: 1;">
+                                <div id="mangaTimerTitle" style="font-size: 14.5px; font-weight: 800; color: #ffffff; margin-bottom: 2px;">
+                                    Step 1: 首すじ・側頭部伸ばし (左右各10秒)
+                                </div>
+                                <div id="mangaTimerDesc" style="font-size: 12px; color: #cbd5e1; line-height: 1.45;">
+                                    背筋を伸ばし、頭をゆっくり横へ倒して首すじを心地よく伸ばします。
+                                </div>
+                            </div>
+                            <div id="mangaTimerText" style="font-size: 16px; font-weight: 900; color: #38bdf8; white-space: nowrap;">
+                                残り: 60秒
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
     }
 };
 
@@ -820,7 +879,7 @@ window.startMangaInlineTimer = function(category) {
         if (iconEl) iconEl.innerText = activeStep.icon;
         if (titleEl) titleEl.innerText = activeStep.title;
         if (descEl) descEl.innerHTML = activeStep.desc;
-        if (timeTextEl) timeTextEl.innerText = `残り時間: ${sec}秒`;
+        if (timeTextEl) timeTextEl.innerText = `残り: ${sec}秒`;
     }
 
     updateTimer(timeLeft);
@@ -835,10 +894,7 @@ window.startMangaInlineTimer = function(category) {
             if (iconEl) iconEl.innerText = '✨';
             if (titleEl) titleEl.innerText = '🎉 1分間セルフケア完了！';
             if (descEl) descEl.innerHTML = '血流がスムーズになり、自律神経が整いました。視界スッキリ！';
-            if (timeTextEl) timeTextEl.innerText = 'リフレッシュ完了！';
+            if (timeTextEl) timeTextEl.innerText = '完了！';
         }
     }, 1000);
-
-    // Scroll to timer smoothly
-    timerSec.scrollIntoView({ behavior: 'smooth' });
 };

@@ -959,60 +959,30 @@
         </div>
     </div>
 
-    <!-- 4-Panel Manga Theater Modal (Fullscreen Immersive) -->
+    <!-- 4-Panel Manga Theater Modal (2-Column Fullscreen Immersive) -->
     <div class="modal-overlay modal-fullscreen" id="mangaModal">
-        <div class="modal-content" style="max-width: 960px; text-align: center;">
+        <div class="modal-content" style="max-width: 1140px; text-align: center; width: 95vw; padding: 20px 24px; max-height: 94vh;">
             <button class="modal-close" onclick="closeMangaModal()">&times;</button>
             
-            <div style="margin-top: 6px; margin-bottom: 12px;">
-                <span class="badge badge-pink" style="font-size: 11px; padding: 3px 12px; margin-bottom: 6px;">4コマ漫画でわかる！からだリセット劇場</span>
-                <h2 id="mangaModalTitle" style="font-size: 22px; font-weight: 800; color: #ffffff; letter-spacing: -0.5px;">
+            <div style="margin-top: 2px; margin-bottom: 6px;">
+                <span class="badge badge-pink" style="font-size: 11px; padding: 3px 12px; margin-bottom: 4px;">4コマ漫画でわかる！からだリセット劇場</span>
+                <h2 id="mangaModalTitle" style="font-size: 20px; font-weight: 800; color: #ffffff; letter-spacing: -0.5px; margin-top: 2px;">
                     首凝り・スマホ首編「頭が20kg！？スマホ首の悲劇」
                 </h2>
             </div>
 
-            <!-- Manga Category Selector Tabs -->
+            <!-- Manga Category Selector Tabs (High Visibility Pills) -->
             <div class="manga-tabs">
-                <button class="manga-tab-btn active" data-category="neck" onclick="renderManga('neck')">📱 首凝り・スマホ首</button>
-                <button class="manga-tab-btn" data-category="back" onclick="renderManga('back')">🎒 巻き肩・背中痛</button>
-                <button class="manga-tab-btn" data-category="waist" onclick="renderManga('waist')">🪑 座りっぱなし腰痛</button>
-                <button class="manga-tab-btn" data-category="morning" onclick="renderManga('morning')">⏰ 朝起きられないOD</button>
-                <button class="manga-tab-btn" data-category="exam" onclick="renderManga('exam')">📝 試験前パニック</button>
+                <button type="button" class="manga-tab-btn active" data-category="neck" onclick="renderManga('neck')">📱 首凝り・スマホ首</button>
+                <button type="button" class="manga-tab-btn" data-category="back" onclick="renderManga('back')">🎒 巻き肩・背中痛</button>
+                <button type="button" class="manga-tab-btn" data-category="waist" onclick="renderManga('waist')">🪑 座りっぱなし腰痛</button>
+                <button type="button" class="manga-tab-btn" data-category="morning" onclick="renderManga('morning')">⏰ 朝起きられないOD</button>
+                <button type="button" class="manga-tab-btn" data-category="exam" onclick="renderManga('exam')">📝 試験前パニック</button>
             </div>
 
-            <!-- 4-Panel Comic Grid Container -->
-            <div class="manga-grid" id="mangaGrid" style="flex: 1; margin-bottom: 14px;">
-                <!-- Populated dynamically via JS -->
-            </div>
-
-            <!-- Action Trigger Footer -->
-            <div style="display: flex; gap: 12px; width: 100%; max-width: 860px; justify-content: center; align-items: center; margin-bottom: 6px;">
-                <button class="btn btn-secondary" onclick="closeMangaModal()" style="border-radius: 9999px; padding: 10px 24px; font-size: 13px; background: rgba(255,255,255,0.15); color: #fff; border: 1px solid rgba(255,255,255,0.25);">閉じる</button>
-                <button class="btn btn-primary" id="mangaActionBtn" style="border-radius: 9999px; padding: 10px 32px; font-size: 14px; font-weight: 800; background: linear-gradient(135deg, #0284c7, #4f46e5); box-shadow: 0 4px 20px rgba(2, 132, 199, 0.4);">
-                    💆 1分間 首すじ＆あご引きストレッチを開始 ➔
-                </button>
-            </div>
-
-            <!-- Inline Live Timer & Step Guide Section (NEW) -->
-            <div id="mangaTimerSection" style="display: none; background: rgba(15, 23, 42, 0.85); border: 2px solid #38bdf8; border-radius: 16px; padding: 18px 24px; margin-top: 14px; width: 100%; max-width: 860px; box-shadow: 0 0 25px rgba(56, 189, 248, 0.25);">
-                <div class="progress-bar-container" style="width: 100%; height: 8px; background: rgba(255,255,255,0.15); margin-bottom: 12px;">
-                    <div class="progress-bar-fill" id="mangaTimerProgress" style="width: 0%; background: linear-gradient(90deg, #38bdf8, #818cf8);"></div>
-                </div>
-
-                <div style="display: flex; align-items: center; gap: 16px; text-align: left;">
-                    <div style="font-size: 38px;" id="mangaTimerIcon">💆</div>
-                    <div style="flex: 1;">
-                        <div id="mangaTimerTitle" style="font-size: 16px; font-weight: 800; color: #ffffff; margin-bottom: 3px;">
-                            Step 1: 首すじ・側頭部伸ばし (左右各10秒)
-                        </div>
-                        <div id="mangaTimerDesc" style="font-size: 12.5px; color: #cbd5e1; line-height: 1.5;">
-                            背筋を伸ばし、頭をゆっくり横へ倒して首すじを心地よく伸ばします。
-                        </div>
-                    </div>
-                    <div id="mangaTimerText" style="font-size: 18px; font-weight: 900; color: #38bdf8; white-space: nowrap;">
-                        残り時間: 60秒
-                    </div>
-                </div>
+            <!-- 2-Column Main Dynamic Container -->
+            <div id="mangaTheaterContent" style="width: 100%; flex: 1; margin-top: 4px;">
+                <!-- Dynamically rendered via renderManga() -->
             </div>
         </div>
     </div>
