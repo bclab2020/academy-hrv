@@ -959,30 +959,32 @@
         </div>
     </div>
 
-    <!-- 4-Panel Manga Theater Modal (2-Column Fullscreen Immersive) -->
-    <div class="modal-overlay modal-fullscreen" id="mangaModal">
-        <div class="modal-content" style="max-width: 1140px; text-align: center; width: 95vw; padding: 20px 24px; max-height: 94vh;">
-            <button class="modal-close" onclick="closeMangaModal()">&times;</button>
+    <!-- 4-Panel Manga Theater Modal (Clean High-Contrast 2-Column UI) -->
+    <div class="modal-overlay manga-modal-overlay" id="mangaModal">
+        <div class="manga-theater-card">
+            <button type="button" class="manga-close-btn" onclick="closeMangaModal()">&times;</button>
             
-            <div style="margin-top: 2px; margin-bottom: 6px;">
-                <span class="badge badge-pink" style="font-size: 11px; padding: 3px 12px; margin-bottom: 4px;">4コマ漫画でわかる！からだリセット劇場</span>
-                <h2 id="mangaModalTitle" style="font-size: 20px; font-weight: 800; color: #ffffff; letter-spacing: -0.5px; margin-top: 2px;">
+            <div class="manga-theater-header">
+                <span class="badge badge-pink" style="font-size: 11px; padding: 4px 14px; margin-bottom: 4px; font-weight: 800;">4コマ漫画でわかる！からだリセット劇場</span>
+                <h2 id="mangaModalTitle" style="font-size: 21px; font-weight: 800; color: #0f172a; letter-spacing: -0.5px; margin: 4px 0 0 0;">
                     首凝り・スマホ首編「頭が20kg！？スマホ首の悲劇」
                 </h2>
+
+                <!-- Manga Category Selector Tabs (High Visibility Pills) -->
+                <div class="manga-tabs">
+                    <button type="button" class="manga-tab-btn active" data-category="neck" onclick="renderManga('neck')">📱 首凝り・スマホ首</button>
+                    <button type="button" class="manga-tab-btn" data-category="back" onclick="renderManga('back')">🎒 巻き肩・背中痛</button>
+                    <button type="button" class="manga-tab-btn" data-category="waist" onclick="renderManga('waist')">🪑 座りっぱなし腰痛</button>
+                    <button type="button" class="manga-tab-btn" data-category="morning" onclick="renderManga('morning')">⏰ 朝起きられないOD</button>
+                    <button type="button" class="manga-tab-btn" data-category="exam" onclick="renderManga('exam')">📝 試験前パニック</button>
+                </div>
             </div>
 
-            <!-- Manga Category Selector Tabs (High Visibility Pills) -->
-            <div class="manga-tabs">
-                <button type="button" class="manga-tab-btn active" data-category="neck" onclick="renderManga('neck')">📱 首凝り・スマホ首</button>
-                <button type="button" class="manga-tab-btn" data-category="back" onclick="renderManga('back')">🎒 巻き肩・背中痛</button>
-                <button type="button" class="manga-tab-btn" data-category="waist" onclick="renderManga('waist')">🪑 座りっぱなし腰痛</button>
-                <button type="button" class="manga-tab-btn" data-category="morning" onclick="renderManga('morning')">⏰ 朝起きられないOD</button>
-                <button type="button" class="manga-tab-btn" data-category="exam" onclick="renderManga('exam')">📝 試験前パニック</button>
-            </div>
-
-            <!-- 2-Column Main Dynamic Container -->
-            <div id="mangaTheaterContent" style="width: 100%; flex: 1; margin-top: 4px;">
-                <!-- Dynamically rendered via renderManga() -->
+            <!-- 2-Column Main Dynamic Body Container -->
+            <div class="manga-theater-body">
+                <div id="mangaTheaterContent" style="width: 100%;">
+                    <!-- Dynamically rendered via renderManga() -->
+                </div>
             </div>
         </div>
     </div>

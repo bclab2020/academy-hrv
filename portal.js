@@ -677,7 +677,8 @@ window.closeStretchModal = function() {
 
 // ==========================================
 // ==========================================
-// 4-Panel Manga Comic Theater System (2-Column Architecture)
+// ==========================================
+// 4-Panel Manga Comic Theater System (Clean High-Contrast 2-Column UI)
 // ==========================================
 const mangaData = {
     neck: {
@@ -789,7 +790,7 @@ window.renderManga = function(category) {
     const titleEl = document.getElementById('mangaModalTitle');
     if (titleEl) titleEl.innerText = data.title;
 
-    // Render 2-Column Theater Layout
+    // Render Clean High-Contrast 2-Column Theater Layout
     const contentContainer = document.getElementById('mangaTheaterContent');
     if (contentContainer) {
         contentContainer.innerHTML = `
@@ -805,20 +806,20 @@ window.renderManga = function(category) {
                     <div class="manga-info-card">
                         <div class="manga-info-title">${data.medicalTitle}</div>
                         <div class="manga-info-desc">${data.medicalDesc}</div>
-                        <div style="margin-top: 14px; padding-top: 12px; border-top: 1px dashed rgba(255,255,255,0.2);">
-                            <div style="font-size: 13.5px; font-weight: 800; color: #34d399; margin-bottom: 4px;">${data.solutionTitle}</div>
-                            <div style="font-size: 12px; color: #cbd5e1; line-height: 1.55;">${data.solutionDesc}</div>
+                        <div class="manga-solution-box">
+                            <div class="manga-solution-title">${data.solutionTitle}</div>
+                            <div class="manga-solution-desc">${data.solutionDesc}</div>
                         </div>
                     </div>
 
                     <!-- Action Trigger Button -->
-                    <button type="button" class="btn btn-primary" id="mangaActionBtn" onclick="startMangaInlineTimer('${category}')" style="width: 100%; border-radius: 9999px; padding: 15px 24px; font-size: 15px; font-weight: 800; background: linear-gradient(135deg, #0284c7, #4f46e5); box-shadow: 0 4px 20px rgba(2, 132, 199, 0.4); cursor: pointer; border: none; color: #fff;">
-                        ${data.actionBtnText}
+                    <button type="button" class="manga-action-btn" id="mangaActionBtn" onclick="startMangaInlineTimer('${category}')">
+                        <span>${data.actionBtnText}</span>
                     </button>
 
                     <!-- Inline Live Timer Container -->
-                    <div id="mangaTimerSection" style="display: none; background: rgba(15, 23, 42, 0.95); border: 2px solid #38bdf8; border-radius: 18px; padding: 18px 20px; box-shadow: 0 0 25px rgba(56, 189, 248, 0.25);">
-                        <div class="progress-bar-container" style="width: 100%; height: 8px; background: rgba(255,255,255,0.15); margin-bottom: 12px; border-radius:9999px;">
+                    <div id="mangaTimerSection" style="display: none;" class="manga-timer-card">
+                        <div class="progress-bar-container" style="width: 100%; height: 8px; background: rgba(255,255,255,0.2); margin-bottom: 12px; border-radius:9999px;">
                             <div class="progress-bar-fill" id="mangaTimerProgress" style="width: 0%; height:100%; background: linear-gradient(90deg, #38bdf8, #818cf8); border-radius:9999px; transition: width 0.3s linear;"></div>
                         </div>
 
