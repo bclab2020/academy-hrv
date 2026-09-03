@@ -592,6 +592,34 @@
                     </div>
                 </div>
 
+                <!-- 4-Panel Manga Self-Care Theater Card (NEW) -->
+                <div class="glass-card" style="background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 50%, #eff6ff 100%); border: 2px solid #38bdf8; padding: 22px; box-shadow: 0 8px 25px rgba(56, 189, 248, 0.12); margin-top: 6px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 8px;">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span style="font-size: 22px;">📚</span>
+                            <div>
+                                <span class="badge badge-pink" style="font-size: 10px; margin-bottom: 2px;">タイパ最強・10秒でわかる！</span>
+                                <h3 style="font-size: 16px; font-weight: 800; color: var(--text-primary); margin: 0;">
+                                    4コマ漫画でわかる！学生のからだリセット劇場
+                                </h3>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary" onclick="openMangaModal('neck')" style="border-radius: 9999px; font-size: 12px; padding: 8px 18px; background: linear-gradient(135deg, #0284c7, #4f46e5);">
+                            📖 4コマ漫画を読む ➔
+                        </button>
+                    </div>
+                    <p style="font-size: 12px; color: var(--text-secondary); line-height: 1.5; margin: 0 0 12px 0;">
+                        「肩こり・首凝り・腰痛・背部痛・朝起きられない」など、学生あるあるのお悩みの原因と即効ストレッチを4コマ漫画でサクッと解説！
+                    </p>
+                    <div style="display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px;">
+                        <button type="button" class="preset-btn" onclick="openMangaModal('neck')" style="background:#fff;">📱 首凝り・スマホ首</button>
+                        <button type="button" class="preset-btn" onclick="openMangaModal('back')" style="background:#fff;">🎒 巻き肩・背中痛</button>
+                        <button type="button" class="preset-btn" onclick="openMangaModal('waist')" style="background:#fff;">🪑 座りっぱなし腰痛</button>
+                        <button type="button" class="preset-btn" onclick="openMangaModal('morning')" style="background:#fff;">⏰ 朝起きられないOD</button>
+                        <button type="button" class="preset-btn" onclick="openMangaModal('exam')" style="background:#fff;">📝 試験前パニック</button>
+                    </div>
+                </div>
+
                 <!-- Youth Self-Care Articles & Columns -->
                 <div style="margin-top: 10px;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
@@ -927,6 +955,42 @@
 
             <div style="margin-bottom: 10px;">
                 <button class="btn btn-secondary" onclick="closeStretchModal()" style="border-radius: 9999px; padding: 10px 36px; font-size: 13px; background: rgba(255,255,255,0.15); color: #fff; border: 1px solid rgba(255,255,255,0.25);">終了する</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4-Panel Manga Theater Modal (Fullscreen Immersive) -->
+    <div class="modal-overlay modal-fullscreen" id="mangaModal">
+        <div class="modal-content" style="max-width: 960px; text-align: center;">
+            <button class="modal-close" onclick="closeMangaModal()">&times;</button>
+            
+            <div style="margin-top: 6px; margin-bottom: 12px;">
+                <span class="badge badge-pink" style="font-size: 11px; padding: 3px 12px; margin-bottom: 6px;">4コマ漫画でわかる！からだリセット劇場</span>
+                <h2 id="mangaModalTitle" style="font-size: 22px; font-weight: 800; color: #ffffff; letter-spacing: -0.5px;">
+                    首凝り・スマホ首編「頭が20kg！？スマホ首の悲劇」
+                </h2>
+            </div>
+
+            <!-- Manga Category Selector Tabs -->
+            <div class="manga-tabs">
+                <button class="manga-tab-btn active" data-category="neck" onclick="renderManga('neck')">📱 首凝り・スマホ首</button>
+                <button class="manga-tab-btn" data-category="back" onclick="renderManga('back')">🎒 巻き肩・背中痛</button>
+                <button class="manga-tab-btn" data-category="waist" onclick="renderManga('waist')">🪑 座りっぱなし腰痛</button>
+                <button class="manga-tab-btn" data-category="morning" onclick="renderManga('morning')">⏰ 朝起きられないOD</button>
+                <button class="manga-tab-btn" data-category="exam" onclick="renderManga('exam')">📝 試験前パニック</button>
+            </div>
+
+            <!-- 4-Panel Comic Grid Container -->
+            <div class="manga-grid" id="mangaGrid" style="flex: 1; margin-bottom: 14px;">
+                <!-- Populated dynamically via JS -->
+            </div>
+
+            <!-- Action Trigger Footer -->
+            <div style="display: flex; gap: 12px; width: 100%; max-width: 860px; justify-content: center; align-items: center; margin-bottom: 6px;">
+                <button class="btn btn-secondary" onclick="closeMangaModal()" style="border-radius: 9999px; padding: 10px 24px; font-size: 13px; background: rgba(255,255,255,0.15); color: #fff; border: 1px solid rgba(255,255,255,0.25);">閉じる</button>
+                <button class="btn btn-primary" id="mangaActionBtn" style="border-radius: 9999px; padding: 10px 32px; font-size: 14px; font-weight: 800; background: linear-gradient(135deg, #0284c7, #4f46e5); box-shadow: 0 4px 20px rgba(2, 132, 199, 0.4);">
+                    💆 首すじストレッチをやってみる ➔
+                </button>
             </div>
         </div>
     </div>

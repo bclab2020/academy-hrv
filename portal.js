@@ -611,6 +611,244 @@ window.closeStretchModal = function() {
     if (modal) modal.classList.remove('active');
     if (portalStretchInterval) clearInterval(portalStretchInterval);
 };
-    alert(`【相談リクエスト送信完了】\n\nご希望: ${type}\n匿名希望: ${isAnon ? 'はい（統計IDのみ送信）' : 'いいえ（学籍番号を連携）'}\n\nスクールカウンセラー・保健室スタッフに通知が届きました。安心して学校生活をお過ごしください。`);
-    closeConsultModal();
+
+// ==========================================
+// 4-Panel Manga Comic System (4コマ漫画セルフケア)
+// ==========================================
+const mangaData = {
+    neck: {
+        title: "首凝り・スマホ首編「頭が20kg！？スマホ首の悲劇」",
+        actionBtnText: "💆 首すじストレッチをやってみる ➔",
+        actionFn: "openStretchModal",
+        panels: [
+            {
+                step: "1. あるある",
+                header: "スマホ＆自習で首が限界…",
+                icon: "📱😵",
+                bubble: "「うぅ…最近ずっと首と肩が岩みたいに重い。画面見てると頭もズキズキしてくる…」",
+                sfx: "バキバキッ…"
+            },
+            {
+                step: "2. なぜ？",
+                header: "頭の傾きで首に20kg以上の負荷！",
+                icon: "💡👨‍⚕️",
+                bubble: "久保医師「首が前に傾くと、約5kgの頭を支える首の後ろの筋肉に20kg以上の負担がかかり、脳への血管（椎骨動脈）が圧迫されるんだ！」",
+                sfx: "ギクッ！"
+            },
+            {
+                step: "3. 対策！",
+                header: "あご引き＆首すじ横伸ばし！",
+                icon: "💆✨",
+                bubble: "「背筋を伸ばしてあごを引き、頭をゆっくり横に倒して首すじを心地よく10秒キープ！」",
+                sfx: "グ〜〜ッ…"
+            },
+            {
+                step: "4. 解決！",
+                header: "視界がパッと明るく集中復活！",
+                icon: "🎉🧠",
+                bubble: "「すごい！首の詰まりが取れて、頭がスーッと軽くなった！これなら次の過去問に集中できる！」",
+                sfx: "スッキリ爽快！"
+            }
+        ]
+    },
+    back: {
+        title: "巻き肩・背中バキバキ編「猫背で呼吸が止まりそう！？」",
+        actionBtnText: "🔄 肩甲骨はがしストレッチをやってみる ➔",
+        actionFn: "openStretchModal",
+        panels: [
+            {
+                step: "1. あるある",
+                header: "机に向かうとどんどん猫背に…",
+                icon: "🎒😫",
+                bubble: "「重いリュックと長時間の授業で背中がパンパン…息も浅くてすぐ眠くなっちゃう。」",
+                sfx: "ズ〜〜ン…"
+            },
+            {
+                step: "2. なぜ？",
+                header: "胸郭が閉じて酸素が足りない！",
+                icon: "💡👨‍⚕️",
+                bubble: "久保医師「背中が丸まると肋骨（胸郭）の動きがロックされ、肺に酸素が十分に入らなくなる。それが集中力低下の原因だよ！」",
+                sfx: "ハッ…！"
+            },
+            {
+                step: "3. 対策！",
+                header: "肘で円を描く肩甲骨ぐるぐる！",
+                icon: "🔄🙆",
+                bubble: "「両手を肩にチョンと乗せ、肘で大きな円を描くように後ろへゆっくり大きく回そう！」",
+                sfx: "ゴリゴリッ"
+            },
+            {
+                step: "4. 解決！",
+                header: "胸が開いて深呼吸！眠気解消！",
+                icon: "✨🌬️",
+                bubble: "「胸がぐわっと開いて空気がたくさん入ってくる！背中の重だるさも消えた！」",
+                sfx: "シャキーン！"
+            }
+        ]
+    },
+    waist: {
+        title: "座りっぱなし腰痛編「学校の椅子、硬すぎ問題」",
+        actionBtnText: "🧘 椅子お尻ストレッチをやってみる ➔",
+        actionFn: "openStretchModal",
+        panels: [
+            {
+                step: "1. あるある",
+                header: "硬い椅子で5時間…腰が痛い！",
+                icon: "🪑😖",
+                bubble: "「学校や予備校の硬い椅子で座りっぱなし…立ち上がるときに腰がピキッとする…」",
+                sfx: "ピキッ！"
+            },
+            {
+                step: "2. なぜ？",
+                header: "骨盤後傾でお尻がカチコチ！",
+                icon: "💡👨‍⚕️",
+                bubble: "久保医師「骨盤が後ろに倒れると、お尻の奥（梨状筋）や股関節が固まり、腰の骨（腰椎）に全体重がダイレクトに乗ってしまうんだ。」",
+                sfx: "ガチガチ…"
+            },
+            {
+                step: "3. 対策！",
+                header: "座ったまま足組みお尻伸ばし！",
+                icon: "🧘🦵",
+                bubble: "「椅子の上で片足を反対の膝に乗せ（4の字）、背筋を伸ばしたまま体を前に倒す！」",
+                sfx: "じわ〜〜っ"
+            },
+            {
+                step: "4. 解決！",
+                header: "腰の突っ張りがスッと軽快！",
+                icon: "🎉💃",
+                bubble: "「お尻の奥が伸びて腰の重さがスーッと消えた！座り直しても全然ラク！」",
+                sfx: "かる〜い！"
+            }
+        ]
+    },
+    morning: {
+        title: "朝起きられない起立性編「アラーム5個でも無理…」",
+        actionBtnText: "🦶 朝の血流ポンプ運動をやってみる ➔",
+        actionFn: "openStretchModal",
+        panels: [
+            {
+                step: "1. あるある",
+                header: "朝、体が鉛のように重い…",
+                icon: "⏰🛌",
+                bubble: "「アラームが何回鳴ってもベッドから起き上がれない…立ち上がるとクラッとする…」",
+                sfx: "フラフラ…"
+            },
+            {
+                step: "2. なぜ？",
+                header: "血液が脳に届かない起立性の乱れ！",
+                icon: "💡👨‍⚕️",
+                bubble: "久保医師「思春期・青年期は自律神経の切り替えが追いつかず、下半身に血が溜まりやすい（起立性調節障害・OD傾向）。根性論じゃないよ！」",
+                sfx: "納得…！"
+            },
+            {
+                step: "3. 対策！",
+                header: "布団の中で足首パタパタ！",
+                icon: "🦶🔄",
+                bubble: "「起き上がる前に、足首を手前と奥に20回パタパタ動かして、ふくらはぎポンプを発動！」",
+                sfx: "キュッキュッ"
+            },
+            {
+                step: "4. 解決！",
+                header: "血圧が立ち上がりスッキリ起床！",
+                icon: "🌅🏃",
+                bubble: "「頭に血が巡ってきて目がパッチリ開いた！今日も遅刻せずに学校行ける！」",
+                sfx: "覚醒完了！"
+            }
+        ]
+    },
+    exam: {
+        title: "試験前パニック・過緊張編「心臓バクバクで頭真っ白！」",
+        actionBtnText: "🫁 4秒ボックス呼吸をやってみる ➔",
+        actionFn: "openBreathingModal",
+        panels: [
+            {
+                step: "1. あるある",
+                header: "模試・面接直前に大パニック！",
+                icon: "📝😰",
+                bubble: "「ヤバい…試験直前で心臓がバクバク…公式も単語も全部頭から飛んだ…どうしよう！」",
+                sfx: "ドクドクッ！"
+            },
+            {
+                step: "2. なぜ？",
+                header: "交感神経が暴走してるサイン！",
+                icon: "💡👨‍⚕️",
+                bubble: "久保医師「プレッシャーで交感神経が急上昇し、脳の論理的思考エリア（前頭前野）がフリーズしている状態。呼吸でブレーキをかけよう！」",
+                sfx: "ピンチ！"
+            },
+            {
+                step: "3. 対策！",
+                header: "4秒吸って止めて吐くBox呼吸！",
+                icon: "🫁🧘",
+                bubble: "「目を閉じて、4秒吸う ➔ 4秒止める ➔ 4秒吐く ➔ 4秒止めるを3回繰り返す！」",
+                sfx: "ス〜〜〜…"
+            },
+            {
+                step: "4. 解決！",
+                header: "迷走神経ON！最高の実力発揮！",
+                icon: "🎯💯",
+                bubble: "「心拍がスーッと落ち着いた…！視界がクリアになって問題がスラスラ解ける！」",
+                sfx: "ゾーン突入！"
+            }
+        ]
+    }
+};
+
+let currentMangaCategory = 'neck';
+
+window.openMangaModal = function(category = 'neck') {
+    const modal = document.getElementById('mangaModal');
+    if (!modal) return;
+    modal.classList.add('active');
+    renderManga(category);
+};
+
+window.closeMangaModal = function() {
+    const modal = document.getElementById('mangaModal');
+    if (modal) modal.classList.remove('active');
+};
+
+window.renderManga = function(category) {
+    currentMangaCategory = category;
+    const data = mangaData[category];
+    if (!data) return;
+
+    // Update active tab buttons
+    document.querySelectorAll('.manga-tab-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.category === category);
+    });
+
+    const titleEl = document.getElementById('mangaModalTitle');
+    if (titleEl) titleEl.innerText = data.title;
+
+    const grid = document.getElementById('mangaGrid');
+    if (!grid) return;
+    grid.innerHTML = '';
+
+    data.panels.forEach((p, idx) => {
+        const panel = document.createElement('div');
+        panel.className = 'manga-panel';
+        panel.innerHTML = `
+            <div>
+                <span class="manga-panel-badge">${p.step}</span>
+                <div class="manga-panel-header" style="margin-top: 6px;">${p.header}</div>
+                <div class="manga-panel-content">
+                    <div class="manga-panel-icon">${p.icon}</div>
+                    <div class="manga-speech-bubble">${p.bubble}</div>
+                </div>
+            </div>
+            <div class="manga-sfx">${p.sfx}</div>
+        `;
+        grid.appendChild(panel);
+    });
+
+    const actionBtn = document.getElementById('mangaActionBtn');
+    if (actionBtn) {
+        actionBtn.innerText = data.actionBtnText;
+        actionBtn.onclick = () => {
+            closeMangaModal();
+            if (typeof window[data.actionFn] === 'function') {
+                window[data.actionFn]();
+            }
+        };
+    }
 };
