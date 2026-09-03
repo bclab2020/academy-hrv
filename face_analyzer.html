@@ -130,7 +130,7 @@
             gap: 6px;
         }
 
-        /* High-Visibility Motion & Shake Warning Banner */
+        /* High-Visibility Motion & Shake Warning Banner (Active only during measurement) */
         .hud-warning-banner {
             position: absolute;
             top: 60px;
@@ -359,6 +359,17 @@
             box-shadow: 0 4px 15px rgba(2, 132, 199, 0.08);
         }
 
+        /* Dynamic Prescription Action Card */
+        .prescription-linked-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f0f9ff 100%);
+            border: 2px solid var(--accent-blue);
+            border-radius: 16px;
+            padding: 16px;
+            margin: 14px 0;
+            box-shadow: 0 6px 20px rgba(2, 132, 199, 0.12);
+            transition: all 0.3s ease;
+        }
+
         /* Breathing Modal / Fullscreen */
         .breathing-container {
             text-align: center;
@@ -396,6 +407,116 @@
             background: #0f172a;
             border-radius: 16px;
             margin-top: 12px;
+        }
+
+        /* Stretch Exercise Guide */
+        .stretch-step-box {
+            background: #f8fafc;
+            border: 1.5px solid var(--border-color);
+            border-radius: 14px;
+            padding: 16px;
+            text-align: center;
+            margin: 14px 0;
+            transition: all 0.3s ease;
+        }
+
+        .stretch-step-box.active {
+            border-color: var(--accent-blue);
+            background: #f0f9ff;
+            box-shadow: 0 4px 15px rgba(2, 132, 199, 0.15);
+        }
+
+        .stretch-anim-icon {
+            font-size: 44px;
+            margin-bottom: 8px;
+            display: inline-block;
+            animation: bounceSoft 2s infinite ease-in-out;
+        }
+
+        @keyframes bounceSoft {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 9999px;
+            overflow: hidden;
+            margin: 12px 0;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #38bdf8, #4f46e5);
+            width: 0%;
+            transition: width 0.3s linear;
+        }
+
+        /* Responsive Optimization for face_analyzer.html */
+        @media (max-width: 640px) {
+            .analyzer-container {
+                padding: 12px 8px;
+                gap: 14px;
+            }
+
+            .camera-card {
+                border-radius: 16px;
+                border-width: 2px;
+            }
+
+            .hud-top-left, .hud-top-right {
+                padding: 4px 10px;
+                font-size: 10px;
+            }
+
+            .hud-warning-banner {
+                top: 48px;
+                left: 10px;
+                right: 10px;
+                padding: 8px 12px;
+                font-size: 11px;
+            }
+
+            .countdown-num {
+                font-size: 38px;
+            }
+
+            .countdown-text {
+                font-size: 10.5px;
+            }
+
+            .result-metric-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 8px;
+            }
+
+            .metric-card {
+                padding: 10px 8px;
+            }
+
+            .metric-value {
+                font-size: 20px;
+            }
+
+            .evidence-detail-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 8px;
+            }
+
+            .evidence-item {
+                padding: 8px;
+                font-size: 10.5px;
+            }
+
+            .oscilloscope-box {
+                bottom: 10px;
+                left: 10px;
+                right: 10px;
+                height: 58px;
+                padding: 4px 8px;
+            }
         }
     </style>
 </head>
@@ -576,9 +697,72 @@
                     スキャンを実施すると、久保医師監修のユース向け自律神経処方箋（生活リズム・集中・休養アドバイス）が出力されます。
                 </div>
 
+                <!-- Dynamic Prescription Action Card (Linked to Measurement Result) -->
+                <div class="prescription-linked-card" id="prescriptionCard" style="display: none;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                        <span class="badge badge-indigo" id="prescriptionBadge">🎯 あなたへの即効改善処方箋</span>
+                        <span style="font-size: 10px; color: var(--accent-blue); font-weight: 700;">結果連動型アクション</span>
+                    </div>
+                    <h4 id="prescriptionTitle" style="font-size: 14.5px; font-weight: 800; color: var(--text-primary); margin: 0 0 4px 0;">
+                        🫁 4秒ボックス呼吸 (Box Breathing) を推奨
+                    </h4>
+                    <p id="prescriptionDesc" style="font-size: 11.5px; color: var(--text-secondary); line-height: 1.5; margin: 0 0 10px 0;">
+                        交感神経の緊張が高まっています。1分間の深呼吸で迷走神経を刺激し、脳の過緊張をリセットしましょう。
+                    </p>
+                    <button class="btn btn-primary" id="prescriptionActionBtn" onclick="runPrescriptionAction()" style="width: 100%; border-radius: 9999px; font-size: 12px; font-weight: 700; padding: 9px;">
+                        ⚡ 今すぐこの改善アクションを開始する ➔
+                    </button>
+                </div>
+
                 <button class="btn btn-primary" id="saveResultBtn" onclick="saveResultToPortal()" style="width: 100%; border-radius: 9999px; font-size: 12px;" disabled>
                     💾 この結果を学生ポータル履歴に保存
                 </button>
+            </div>
+
+            <!-- Instant Actions Card (Breathing & Eye Exercise & Stretch) -->
+            <div class="glass-card">
+                <div class="panel-title" style="margin-bottom: 12px; justify-content: space-between;">
+                    <span>⚡ ユース・即効改善アクション一覧</span>
+                    <span style="font-size: 10px; color: var(--text-muted);">いつでも実施可能</span>
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <!-- Breathing Guide Trigger -->
+                    <div id="actionItemBreathing" style="background: #f8fafc; border: 1px solid var(--border-color); border-radius: 12px; padding: 12px; display: flex; align-items: center; justify-content: space-between; transition: all 0.2s ease;">
+                        <div>
+                            <div style="font-size: 13px; font-weight: 700; color: var(--text-primary); display: flex; align-items: center; gap: 6px;">
+                                <span>🫁 1分間リセット呼吸 (Box Breathing)</span>
+                                <span class="badge badge-blue" id="tagBreathing" style="display:none; font-size:9px;">推奨</span>
+                            </div>
+                            <div style="font-size: 11px; color: var(--text-secondary); margin-top: 2px;">過緊張・試験前・面接前のメンタルリセット</div>
+                        </div>
+                        <button class="btn btn-secondary" onclick="openBreathingModal()" style="font-size: 11px; padding: 6px 14px; border-radius: 9999px;">開始</button>
+                    </div>
+
+                    <!-- Eye Game Trigger -->
+                    <div id="actionItemEye" style="background: #f8fafc; border: 1px solid var(--border-color); border-radius: 12px; padding: 12px; display: flex; align-items: center; justify-content: space-between; transition: all 0.2s ease;">
+                        <div>
+                            <div style="font-size: 13px; font-weight: 700; color: var(--text-primary); display: flex; align-items: center; gap: 6px;">
+                                <span>👀 30秒アイトレーニングゲーム</span>
+                                <span class="badge badge-pink" id="tagEye" style="display:none; font-size:9px;">推奨</span>
+                            </div>
+                            <div style="font-size: 11px; color: var(--text-secondary); margin-top: 2px;">スマホ・PC凝視による眼精疲労と脳の血流改善</div>
+                        </div>
+                        <button class="btn btn-secondary" onclick="openEyeGameModal()" style="font-size: 11px; padding: 6px 14px; border-radius: 9999px;">遊ぶ</button>
+                    </div>
+
+                    <!-- Shoulder & Neck Stretch Trigger -->
+                    <div id="actionItemStretch" style="background: #f8fafc; border: 1px solid var(--border-color); border-radius: 12px; padding: 12px; display: flex; align-items: center; justify-content: space-between; transition: all 0.2s ease;">
+                        <div>
+                            <div style="font-size: 13px; font-weight: 700; color: var(--text-primary); display: flex; align-items: center; gap: 6px;">
+                                <span>🧘 1分間 肩甲骨・首肩リフレッシュストレッチ</span>
+                                <span class="badge badge-green" id="tagStretch" style="display:none; font-size:9px;">推奨</span>
+                            </div>
+                            <div style="font-size: 11px; color: var(--text-secondary); margin-top: 2px;">椅子に座ったままできる起立性覚醒＆姿勢改善</div>
+                        </div>
+                        <button class="btn btn-secondary" onclick="openStretchModal()" style="font-size: 11px; padding: 6px 14px; border-radius: 9999px;">開始</button>
+                    </div>
+                </div>
             </div>
 
             <!-- Medical Evidence & Scientific Explanation Collapsible Details -->
@@ -641,33 +825,6 @@
                 </details>
             </div>
 
-            <!-- Instant Actions Card (Breathing & Eye Exercise) -->
-            <div class="glass-card">
-                <div class="panel-title" style="margin-bottom: 12px;">
-                    <span>⚡ 測定直後の即効アクション</span>
-                </div>
-
-                <div style="display: flex; flex-direction: column; gap: 10px;">
-                    <!-- Breathing Guide Trigger -->
-                    <div style="background: #f8fafc; border: 1px solid var(--border-color); border-radius: 12px; padding: 12px; display: flex; align-items: center; justify-content: space-between;">
-                        <div>
-                            <div style="font-size: 13px; font-weight: 700; color: var(--text-primary);">🫁 1分間リセット呼吸 (Box Breathing)</div>
-                            <div style="font-size: 11px; color: var(--text-secondary); margin-top: 2px;">テスト前・面接前の過緊張をその場でリセット</div>
-                        </div>
-                        <button class="btn btn-secondary" onclick="openBreathingModal()" style="font-size: 11px; padding: 6px 14px; border-radius: 9999px;">開始</button>
-                    </div>
-
-                    <!-- Eye Game Trigger -->
-                    <div style="background: #f8fafc; border: 1px solid var(--border-color); border-radius: 12px; padding: 12px; display: flex; align-items: center; justify-content: space-between;">
-                        <div>
-                            <div style="font-size: 13px; font-weight: 700; color: var(--text-primary);">👀 30秒アイトレーニングゲーム</div>
-                            <div style="font-size: 11px; color: var(--text-secondary); margin-top: 2px;">スマホ・PC凝視による眼精疲労と首の緊張を解放</div>
-                        </div>
-                        <button class="btn btn-secondary" onclick="openEyeGameModal()" style="font-size: 11px; padding: 6px 14px; border-radius: 9999px;">遊ぶ</button>
-                    </div>
-                </div>
-            </div>
-
             <!-- Strict Privacy Notice -->
             <div class="glass-card" style="padding: 16px;">
                 <div style="font-size: 12px; font-weight: 700; color: var(--text-primary); margin-bottom: 4px;">
@@ -714,6 +871,43 @@
                 <span id="eyeGameScore" style="font-size: 12px; font-weight: 700; color: var(--accent-pink);">ターゲット追従中...</span>
                 <span id="eyeGameTimer" style="font-size: 12px; font-weight: 700; color: var(--text-primary);">残り: 30秒</span>
             </div>
+
+            <div style="margin-top: 18px; text-align: center;">
+                <button class="btn btn-secondary" onclick="closeEyeGameModal()" style="border-radius: 9999px; padding: 8px 24px;">終了</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Shoulder & Neck Stretch Guide Modal (NEW) -->
+    <div class="modal-overlay" id="stretchModal">
+        <div class="modal-content" style="max-width: 520px; text-align: center;">
+            <button class="modal-close" onclick="closeStretchModal()">&times;</button>
+            <span class="badge badge-green" style="margin-bottom: 8px;">起立性血流改善・姿勢リセット</span>
+            <h3 style="font-size: 18px; font-weight: 800; color: var(--text-primary);">1分間 肩甲骨・首肩ストレッチ</h3>
+            <p style="font-size: 12px; color: var(--text-secondary); margin-top: 4px;">椅子に座ったまま、画面のガイドに合わせてゆっくり筋肉を伸ばしましょう</p>
+
+            <div class="progress-bar-container">
+                <div class="progress-bar-fill" id="stretchProgress"></div>
+            </div>
+
+            <!-- Stretch Step Display -->
+            <div class="stretch-step-box active" id="stretchStepBox">
+                <div class="stretch-anim-icon" id="stretchIcon">🔄</div>
+                <h4 id="stretchStepTitle" style="font-size: 16px; font-weight: 800; color: var(--text-primary); margin: 0 0 6px 0;">
+                    Step 1: 肩甲骨ぐるぐる回し (20秒)
+                </h4>
+                <p id="stretchStepDesc" style="font-size: 12.5px; color: var(--text-secondary); line-height: 1.5; margin: 0;">
+                    両手を肩に乗せ、肘で大きな円を描くように後ろへゆっくり回します。<br>胸を開いて深く息を吸いましょう。
+                </p>
+            </div>
+
+            <div id="stretchTimerText" style="font-size: 15px; font-weight: 800; color: var(--accent-blue); margin: 10px 0;">
+                残り時間: 60秒
+            </div>
+
+            <button class="btn btn-secondary" onclick="closeStretchModal()" style="border-radius: 9999px; padding: 8px 28px;">終了する</button>
+        </div>
+    </div>
 
     <!-- Logic Explanation Modal (POPUP) -->
     <div class="modal-overlay" id="logicModal">
@@ -878,6 +1072,9 @@
         let prevPts = null;
         let warningHoldUntil = 0;
         let currentWarningType = "";
+
+        // Recommended Action State
+        let recommendedActionType = "breathing"; // "breathing", "eye", "stretch"
 
         // rPPG Signal Data
         let ppgBuffer = [];
@@ -1326,29 +1523,77 @@
             const mockRmssd = Math.floor(48 + Math.random() * 20); // 48-68 ms
             const mockHr = Math.floor(64 + Math.random() * 14); // 64-78 bpm
             const mockSdnn = Math.floor(mockRmssd * 1.15 + (Math.random() * 8)); // 55-85 ms
-            const mockLfHf = (0.8 + (Math.random() * 0.8)).toFixed(2); // 0.8 - 1.6
+            const mockLfHf = parseFloat((0.8 + (Math.random() * 0.9)).toFixed(2)); // 0.8 - 1.7
             const mockAge = Math.floor(17 + (Math.random() * 3)); // 17-19 yrs
-            const mockOd = Math.floor(88 + (Math.random() * 10)); // 88-98%
+            const mockOd = Math.floor(86 + (Math.random() * 12)); // 86-98%
             
             let balance = "バランス良好";
             let arousal = `覚醒スイッチ ON (${mockOd}%)`;
             let condition = "良好";
             let advice = "";
 
+            // Dynamic Action Recommendation Setup
+            const prescriptionCard = document.getElementById('prescriptionCard');
+            const prescriptionTitle = document.getElementById('prescriptionTitle');
+            const prescriptionDesc = document.getElementById('prescriptionDesc');
+            const prescriptionBadge = document.getElementById('prescriptionBadge');
+            const prescriptionActionBtn = document.getElementById('prescriptionActionBtn');
+
+            // Reset action tags & styles
+            document.getElementById('tagBreathing').style.display = 'none';
+            document.getElementById('tagEye').style.display = 'none';
+            document.getElementById('tagStretch').style.display = 'none';
+            document.getElementById('actionItemBreathing').style.borderColor = 'var(--border-color)';
+            document.getElementById('actionItemEye').style.borderColor = 'var(--border-color)';
+            document.getElementById('actionItemStretch').style.borderColor = 'var(--border-color)';
+
             if (mockRmssd >= 58) {
                 condition = "絶好調 (高回復)";
                 balance = "副交感神経優位 (回復)";
                 advice = "✨ <strong>【久保医師監修処方箋】自律神経の回復力・弾力性が非常に高い状態です！</strong> 副交感神経が正常に働き、脳の論理的思考エリア（前頭前野）が活性化しています。難関大の過去問演習や大事なプレゼン・試合で最高の実力を発揮できます。";
+                
+                // Recommend Eye exercise or Light stretch for optimal readiness
+                recommendedActionType = "eye";
+                prescriptionBadge.innerText = "🎯 集中・ゾーン維持処方箋";
+                prescriptionTitle.innerHTML = "👀 30秒アイトレーニング (動体視力・視野拡大)";
+                prescriptionDesc.innerHTML = "自律神経が最高潮です！30秒の光追従ゲームで眼筋を刺激し、脳のワーキングメモリと集中ゾーンをさらに研ぎ澄ましましょう。";
+                prescriptionActionBtn.innerText = "⚡ 30秒アイトレーニングを開始 ➔";
+                
+                document.getElementById('tagEye').style.display = 'inline-block';
+                document.getElementById('actionItemEye').style.borderColor = 'var(--accent-pink)';
             } else if (mockRmssd >= 45) {
                 condition = "通常バランス";
                 balance = "適度な覚醒バランス";
-                advice = "⚡ <strong>【久保医師監修処方箋】安定した活動コンディションです。</strong> 授業や勉強の合間に、1分間の深呼吸や肩甲骨ストレッチを取り入れて集中を持続させましょう。";
+                advice = "⚡ <strong>【久保医師監修処方箋】安定した活動コンディションです。</strong> 授業や勉強の合間に、肩甲骨ストレッチや深呼吸を取り入れて集中を持続させましょう。";
+                
+                // Recommend Shoulder stretch to maintain blood flow
+                recommendedActionType = "stretch";
+                prescriptionBadge.innerText = "🎯 血流・姿勢リセット処方箋";
+                prescriptionTitle.innerHTML = "🧘 1分間 肩甲骨・首肩リフレッシュストレッチ";
+                prescriptionDesc.innerHTML = "座りっぱなしによる首肩のコリと血流低下を防ぎます。1分間の肩甲骨回しで脳への酸素供給をスムーズに保ちましょう。";
+                prescriptionActionBtn.innerText = "⚡ 1分間ストレッチを開始 ➔";
+
+                document.getElementById('tagStretch').style.display = 'inline-block';
+                document.getElementById('actionItemStretch').style.borderColor = 'var(--accent-green)';
             } else {
                 condition = "やや過緊張・疲労";
                 balance = "交感神経優位 (緊張気味)";
                 arousal = `自律神経疲労 (${mockOd}%)`;
-                advice = "⚠️ <strong>【久保医師監修処方箋】交感神経が高ぶり疲労が蓄積しています。</strong> 受験ストレスやスマホ夜更かしのサインかもしれません。今夜は無理な詰め込みを避け、下の「1分間リセット呼吸」で自律神経を整えて早めに就寝しましょう。";
+                advice = "⚠️ <strong>【久保医師監修処方箋】交感神経が高ぶり疲労が蓄積しています。</strong> 受験ストレスやスマホ夜更かしのサインかもしれません。今すぐ「4秒ボックス呼吸」で自律神経を整えましょう。";
+                
+                // Recommend Box Breathing for high stress/tension
+                recommendedActionType = "breathing";
+                prescriptionBadge.innerText = "🎯 自律神経リセット処方箋";
+                prescriptionTitle.innerHTML = "🫁 1分間 4秒ボックス呼吸 (Box Breathing)";
+                prescriptionDesc.innerHTML = "交感神経の過緊張を即座にリセット。4秒吸って4秒止める呼吸法で迷走神経を刺激し、心拍のゆらぎを取り戻します。";
+                prescriptionActionBtn.innerText = "⚡ 1分間リセット呼吸を開始 ➔";
+
+                document.getElementById('tagBreathing').style.display = 'inline-block';
+                document.getElementById('actionItemBreathing').style.borderColor = 'var(--accent-blue)';
             }
+
+            // Show Linked Prescription Card
+            prescriptionCard.style.display = 'block';
 
             currentCalculatedResult = {
                 date: getFormattedNow(),
@@ -1361,7 +1606,8 @@
                 lfhf: mockLfHf,
                 age: mockAge,
                 od: mockOd,
-                advice: advice
+                advice: advice,
+                recommendedAction: recommendedActionType
             };
 
             // Update Primary UI
@@ -1382,7 +1628,18 @@
 
             document.getElementById('resAdviceBox').innerHTML = advice;
             document.getElementById('saveResultBtn').disabled = false;
-            statusBar.innerText = '測定が完了しました！久保医師監修の診断根拠・エビデンス解説をご確認ください。';
+            statusBar.innerText = '測定が完了しました！下の「あなたへの即効改善処方箋」をぜひお試しください。';
+        }
+
+        // Run the dynamic recommended action linked to measurement
+        function runPrescriptionAction() {
+            if (recommendedActionType === 'breathing') {
+                openBreathingModal();
+            } else if (recommendedActionType === 'eye') {
+                openEyeGameModal();
+            } else if (recommendedActionType === 'stretch') {
+                openStretchModal();
+            }
         }
 
         function getFormattedNow() {
@@ -1409,7 +1666,7 @@
             location.href = 'index.html';
         }
 
-        // Breathing Modal Logic
+        // 1. Breathing Modal Logic
         let breathInterval = null;
         function openBreathingModal() {
             const modal = document.getElementById('breathingModal');
@@ -1462,7 +1719,7 @@
             }, 4000);
         }
 
-        // Eye Game Modal Logic
+        // 2. Eye Game Modal Logic
         let eyeGameInterval = null;
         let eyeAnimId = null;
         function openEyeGameModal() {
@@ -1529,11 +1786,77 @@
             drawGame();
         }
 
+        // 3. Stretch Modal Logic (NEW)
+        let stretchInterval = null;
+        function openStretchModal() {
+            const modal = document.getElementById('stretchModal');
+            modal.classList.add('active');
+            startStretchCycle();
+        }
+
+        function closeStretchModal() {
+            const modal = document.getElementById('stretchModal');
+            modal.classList.remove('active');
+            if (stretchInterval) clearInterval(stretchInterval);
+        }
+
+        function startStretchCycle() {
+            let timeLeft = 60;
+            const totalDuration = 60;
+            const timerEl = document.getElementById('stretchTimerText');
+            const progressEl = document.getElementById('stretchProgress');
+            const iconEl = document.getElementById('stretchIcon');
+            const titleEl = document.getElementById('stretchStepTitle');
+            const descEl = document.getElementById('stretchStepDesc');
+
+            function updateStep(sec) {
+                const elapsed = totalDuration - sec;
+                const pct = (elapsed / totalDuration) * 100;
+                progressEl.style.width = `${pct}%`;
+
+                if (sec > 40) {
+                    // Step 1: 0 - 20s
+                    iconEl.innerText = "🔄";
+                    titleEl.innerText = "Step 1: 肩甲骨ぐるぐる回し (20秒)";
+                    descEl.innerHTML = "両手を肩に乗せ、肘で大きな円を描くように後ろへゆっくり回します。<br>胸郭を開いて深く息を吸いましょう。";
+                } else if (sec > 20) {
+                    // Step 2: 20 - 40s
+                    iconEl.innerText = "💆";
+                    titleEl.innerText = "Step 2: 首すじ・側頭部ストレッチ (20秒)";
+                    descEl.innerHTML = "頭をゆっくり左へ倒し、右の首すじを心地よく伸ばします（10秒で反対側へ）。<br>脳への血流ルート（椎骨動脈）の緊張を解放します。";
+                } else {
+                    // Step 3: 40 - 60s
+                    iconEl.innerText = "🙆";
+                    titleEl.innerText = "Step 3: 両手を組んでぐ〜っと背伸び (20秒)";
+                    descEl.innerHTML = "頭上で両手を組み、手のひらを上に向けて天井へ背伸びします。<br>息を吐きながら身体を左右に軽く揺らしましょう。";
+                }
+                timerEl.innerText = `残り時間: ${sec}秒`;
+            }
+
+            updateStep(timeLeft);
+
+            stretchInterval = setInterval(() => {
+                timeLeft--;
+                updateStep(timeLeft);
+
+                if (timeLeft <= 0) {
+                    clearInterval(stretchInterval);
+                    progressEl.style.width = "100%";
+                    iconEl.innerText = "✨";
+                    titleEl.innerText = "🎉 1分間ストレッチ完了！";
+                    descEl.innerHTML = "肩甲骨と首の緊張がほぐれ、脳と全身への血流がスムーズになりました！";
+                    timerEl.innerText = "リフレッシュ完了！";
+                }
+            }, 1000);
+        }
+
         // Initialize waveform on load
         window.addEventListener('DOMContentLoaded', () => {
             initPpgCanvas();
             if (window.location.hash === '#breathing') {
                 openBreathingModal();
+            } else if (window.location.hash === '#stretch') {
+                openStretchModal();
             }
         });
     </script>

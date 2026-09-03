@@ -126,6 +126,32 @@
             line-height: 1.6;
             margin-bottom: 24px;
         }
+
+        /* Mobile specific overrides for admin.html */
+        @media (max-width: 640px) {
+            .admin-login-container {
+                padding: 16px 12px;
+                align-items: flex-start;
+            }
+
+            .admin-login-card {
+                padding: 24px 16px;
+                border-radius: 16px;
+            }
+
+            .stats-summary-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+            }
+
+            .stat-card {
+                padding: 12px 14px;
+            }
+
+            .stat-value {
+                font-size: 20px;
+            }
+        }
     </style>
 </head>
 <body>
