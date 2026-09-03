@@ -135,8 +135,12 @@ function renderConditionSummary() {
         }
     }
     
+    const savedLatestAdvice = localStorage.getItem('academy_latest_advice');
+    
     if (adviceTextEl) {
-        if (latest.hrv >= 55) {
+        if (savedLatestAdvice) {
+            adviceTextEl.innerHTML = `<span style="font-size:11px; font-weight:800; color:var(--accent-blue); display:block; margin-bottom:4px;">🧠 AI専属トレーナー処方箋 (久保医師監修アルゴリズム)</span>${savedLatestAdvice}`;
+        } else if (latest.hrv >= 55) {
             adviceTextEl.innerHTML = '✨ <strong>自律神経バランスは絶好調です！</strong> 副交感神経がしっかり働き、回復力と集中力が高まっています。大事な試験勉強や実力発揮に最適なコンディションです。';
         } else if (latest.hrv >= 40) {
             adviceTextEl.innerHTML = '⚡ <strong>適度な活動バランスを維持しています。</strong> 授業や勉強の合間に、5分間の肩甲骨ストレッチや深呼吸を取り入れてリフレッシュを心がけましょう。';

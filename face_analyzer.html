@@ -692,9 +692,33 @@
                     </div>
                 </div>
 
-                <!-- Instant Personalized Advice (久保医師監修) -->
-                <div id="resAdviceBox" style="background: #f8fafc; border-left: 3px solid var(--accent-blue); padding: 12px; border-radius: 8px; font-size: 12px; line-height: 1.6; color: var(--text-secondary); margin: 12px 0;">
-                    スキャンを実施すると、久保医師監修のユース向け自律神経処方箋（生活リズム・集中・休養アドバイス）が出力されます。
+                <!-- AI Conditioning Advisor Card (LLM Integration with Ethical Guardrails) -->
+                <div class="glass-card" style="background: #ffffff; border: 1.5px solid rgba(2, 132, 199, 0.35); padding: 16px; border-radius: 14px; margin: 14px 0; box-shadow: 0 4px 18px rgba(2, 132, 199, 0.08);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 6px;">
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                            <span style="font-size: 14px;">🧠</span>
+                            <span style="font-size: 13px; font-weight: 800; color: var(--accent-blue);">AI専属トレーナー処方箋</span>
+                            <span class="badge badge-blue" style="font-size: 9.5px;">久保医師監修アルゴリズム</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                            <span class="badge badge-green" style="font-size: 9.5px;" title="氏名や学校名などの個人情報は完全に除外して生体数値のみを処理します">🛡️ PIIマスキング済</span>
+                            <button type="button" onclick="openLlmConfigModal()" style="background: none; border: 1px solid var(--border-color); border-radius: 6px; padding: 2px 8px; font-size: 10.5px; color: var(--text-secondary); cursor: pointer;">⚙️ LLM設定</button>
+                        </div>
+                    </div>
+
+                    <div id="resAdviceBox" style="font-size: 12px; line-height: 1.65; color: var(--text-primary); min-height: 48px;">
+                        スキャンを実施すると、久保医師の医学的知見と倫理ガードレールに基づくAIパーソナライズ処方箋（共感・生理学的背景・今日のワンアクション）が自動生成されます。
+                    </div>
+
+                    <div style="border-top: 1px dashed var(--border-color); padding-top: 8px; margin-top: 10px; display: flex; justify-content: space-between; align-items: center; font-size: 10px; color: var(--text-muted);">
+                        <span>※本アドバイスは医学的診断を行うものではなく、セルフケアの気付きを促すコンディショニング提案です。</span>
+                    </div>
+
+                    <!-- SOS Escalation Button (Appears only on high stress) -->
+                    <div id="sosEscalationBox" style="display: none; margin-top: 10px; padding: 8px 12px; background: #fff1f2; border: 1px solid #fecdd3; border-radius: 8px; align-items: center; justify-content: space-between; gap: 8px;">
+                        <span style="font-size: 11px; color: #be123c; font-weight: 600;">🤝 ひとりで抱え込まず、相談室のカウンセラーに話してみませんか？</span>
+                        <button type="button" onclick="location.href='index.html'" class="btn btn-secondary" style="padding: 4px 10px; font-size: 10.5px; border-radius: 9999px; background: #be123c; color: #fff; border: none; white-space: nowrap;">相談室へ</button>
+                    </div>
                 </div>
 
                 <!-- Dynamic Prescription Action Card (Linked to Measurement Result) -->
@@ -1008,14 +1032,93 @@
                 🛡️ <strong>エッジ処理の保証:</strong> 上記の数学的・生理学的解析処理はすべてお使いのブラウザ内部（JavaScript）でのみ完結しており、生体データや顔映像が外部サーバーへ送信されることは一切ありません。
             </div>
 
-            <div style="margin-top: 18px; text-align: center;">
-                <button class="btn btn-secondary" onclick="closeLogicModal()" style="border-radius: 9999px; padding: 8px 32px;">閉じる</button>
-            </div>
+    <!-- LLM Config Modal (POPUP) -->
+    <div class="modal-overlay" id="llmConfigModal">
+        <div class="modal-content" style="max-width: 580px; text-align: left;">
+            <button class="modal-close" onclick="closeLlmConfigModal()">&times;</button>
+            <span class="badge badge-blue" style="margin-bottom: 8px;">LLM Integration & AI Guardrails</span>
+            <h3 style="font-size: 18px; font-weight: 800; color: var(--text-primary);">⚙️ AIアドバイザー設定 & 倫理規約</h3>
+            <p style="font-size: 12px; color: var(--text-secondary); margin-top: 4px; margin-bottom: 16px;">
+                HRV生体データに基づき、久保医師監修のプロンプト規約に準拠してパーソナライズ処方箋を出力するAIエンジンを設定します。
+            </p>
+
+            <form onsubmit="saveLlmConfig(event)">
+                <div class="form-group">
+                    <label for="llmProvider">AI生成エンジン / プロバイダー</label>
+                    <select id="llmProvider" class="form-input" onchange="toggleApiKeyField()">
+                        <option value="builtin">🌟 久保医師監修 内蔵AIエンジン (APIキー不要・推奨・即時利用)</option>
+                        <option value="openai">🤖 OpenAI API (GPT-4o-mini / GPT-4o)</option>
+                        <option value="gemini">✨ Google Gemini API (Gemini 1.5 Flash)</option>
+                    </select>
+                </div>
+
+                <div class="form-group" id="apiKeyGroup" style="display: none;">
+                    <label for="llmApiKey">API キー (端末のローカルストレージに安全保存)</label>
+                    <input type="password" id="llmApiKey" class="form-input" placeholder="sk-... または AIza...">
+                    <div style="font-size: 10.5px; color: var(--text-muted); margin-top: 4px;">
+                        ※APIキーはお使いのブラウザ内部にのみ保存され、外部サーバーへ送信されることはありません。
+                    </div>
+                </div>
+
+                <!-- Ethical Guardrails Accordion -->
+                <details class="evidence-accordion" style="margin: 14px 0;" open>
+                    <summary>
+                        <span style="font-size: 11.5px;">🛡️ 適用中の倫理・道徳・教育的ガードレール規約</span>
+                        <span style="font-size: 10px; color: var(--accent-blue);">▼ 展開</span>
+                    </summary>
+                    <div style="font-size: 11px; color: var(--text-secondary); line-height: 1.6; margin-top: 8px; border-top: 1px dashed var(--border-color); padding-top: 8px;">
+                        <strong>1. 診断の厳格な禁止:</strong> 病名（うつ、自律神経失調症等）や断定表現を排除し、「〜のサイン」など気付きの提示に限定。<br>
+                        <strong>2. ポジティブ・リフレーミング:</strong> 低スコアでも「身体が今頑張っている証拠」として肯定的に受容。<br>
+                        <strong>3. 命令・説教の禁止:</strong> 「〜しなさい」ではなく「〜してみませんか？」と自己決定を尊重。<br>
+                        <strong>4. 個人情報マスキング:</strong> 氏名・学校名等は一切送信せず、匿名数値のみで処理。
+                    </div>
+                </details>
+
+                <div style="display: flex; gap: 10px; margin-top: 18px;">
+                    <button type="button" class="btn btn-secondary" onclick="closeLlmConfigModal()" style="flex: 1; border-radius: 9999px;">キャンセル</button>
+                    <button type="submit" class="btn btn-primary" style="flex: 2; border-radius: 9999px;">設定を保存する</button>
+                </div>
+            </form>
         </div>
     </div>
 
     <!-- Script Logic -->
     <script>
+        // LLM Config Modal Logic
+        function openLlmConfigModal() {
+            const modal = document.getElementById('llmConfigModal');
+            modal.classList.add('active');
+            
+            const savedProvider = localStorage.getItem('academy_llm_provider') || 'builtin';
+            const savedKey = localStorage.getItem('academy_llm_key') || '';
+            document.getElementById('llmProvider').value = savedProvider;
+            document.getElementById('llmApiKey').value = savedKey;
+            toggleApiKeyField();
+        }
+
+        function closeLlmConfigModal() {
+            const modal = document.getElementById('llmConfigModal');
+            modal.classList.remove('active');
+        }
+
+        function toggleApiKeyField() {
+            const provider = document.getElementById('llmProvider').value;
+            const keyGroup = document.getElementById('apiKeyGroup');
+            keyGroup.style.display = (provider === 'openai' || provider === 'gemini') ? 'block' : 'none';
+        }
+
+        function saveLlmConfig(e) {
+            e.preventDefault();
+            const provider = document.getElementById('llmProvider').value;
+            const key = document.getElementById('llmApiKey').value.trim();
+            
+            localStorage.setItem('academy_llm_provider', provider);
+            localStorage.setItem('academy_llm_key', key);
+            
+            alert('✅ AIアドバイザーの設定を保存しました！\n次回のスキャンから反映されます。');
+            closeLlmConfigModal();
+        }
+
         // Logic Modal Functions
         function openLogicModal(targetParam) {
             const modal = document.getElementById('logicModal');
@@ -1652,17 +1755,23 @@
         }
 
         function saveResultToPortal() {
-            if (!currentCalculatedResult) return;
+            if (!lastMeasurement) return;
             const history = JSON.parse(localStorage.getItem('academy_hrv_history') || '[]');
             history.push({
-                date: currentCalculatedResult.date,
-                hrv: currentCalculatedResult.hrv,
-                hr: currentCalculatedResult.hr,
-                condition: currentCalculatedResult.condition
+                date: formatTimestamp(),
+                hrv: lastMeasurement.rmssd,
+                hr: lastMeasurement.hr,
+                sdnn: lastMeasurement.sdnn,
+                lfHf: lastMeasurement.lfHf,
+                autonomicAge: lastMeasurement.autonomicAge,
+                odScore: lastMeasurement.odScore,
+                condition: lastMeasurement.condition,
+                advice: lastGeneratedAdvice
             });
             localStorage.setItem('academy_hrv_history', JSON.stringify(history));
+            localStorage.setItem('academy_latest_advice', lastGeneratedAdvice);
             
-            alert('✅ 測定結果を学生ポータルに記録しました！\nポータル画面で最新のトレンドグラフをご確認いただけます。');
+            alert('✅ 測定結果とAI処方箋を学生ポータルに記録しました！\nポータル画面で最新のトレンドとアドバイスをご確認いただけます。');
             location.href = 'index.html';
         }
 
