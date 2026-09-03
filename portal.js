@@ -623,56 +623,9 @@ window.closeEyeGameModal = function() {
 window.openStretchModal = function() {
     openMangaModal('neck');
 };
-    
-    let timeLeft = 60;
-    const timerEl = document.getElementById('stretchTimerText');
-    const iconEl = document.getElementById('stretchIcon');
-    const titleEl = document.getElementById('stretchStepTitle');
-    const descEl = document.getElementById('stretchStepDesc');
-    const progressEl = document.getElementById('stretchProgress');
-
-    function updateStep(sec) {
-        if (!progressEl) return;
-        const progress = ((60 - sec) / 60) * 100;
-        progressEl.style.width = `${progress}%`;
-
-        if (sec > 40) {
-            iconEl.innerText = "🔄";
-            titleEl.innerText = "Step 1: 肩甲骨ぐるぐる回し (20秒)";
-            descEl.innerHTML = "両手を肩に乗せ、肘で大きな円を描くように後ろへゆっくり回します。<br>胸郭を開いて深く息を吸いましょう。";
-        } else if (sec > 20) {
-            iconEl.innerText = "💆";
-            titleEl.innerText = "Step 2: 首すじ・側頭部ストレッチ (20秒)";
-            descEl.innerHTML = "頭をゆっくり左へ倒し、右の首すじを心地よく伸ばします（10秒で反対側へ）。<br>脳への血流ルート（椎骨動脈）の緊張を解放します。";
-        } else {
-            iconEl.innerText = "🙆";
-            titleEl.innerText = "Step 3: 両手を組んでぐ〜っと背伸び (20秒)";
-            descEl.innerHTML = "頭上で両手を組み、手のひらを上に向けて天井へ背伸びします。<br>息を吐きながら身体を左右に軽く揺らしましょう。";
-        }
-        if (timerEl) timerEl.innerText = `残り時間: ${sec}秒`;
-    }
-
-    updateStep(timeLeft);
-    if (portalStretchInterval) clearInterval(portalStretchInterval);
-    portalStretchInterval = setInterval(() => {
-        timeLeft--;
-        updateStep(timeLeft);
-
-        if (timeLeft <= 0) {
-            clearInterval(portalStretchInterval);
-            if (progressEl) progressEl.style.width = "100%";
-            if (iconEl) iconEl.innerText = "✨";
-            if (titleEl) titleEl.innerText = "🎉 1分間ストレッチ完了！";
-            if (descEl) descEl.innerHTML = "肩甲骨と首の緊張がほぐれ、脳と全身への血流がスムーズになりました！";
-            if (timerEl) timerEl.innerText = "リフレッシュ完了！";
-        }
-    }, 1000);
-};
 
 window.closeStretchModal = function() {
-    const modal = document.getElementById('stretchModal');
-    if (modal) modal.classList.remove('active');
-    if (portalStretchInterval) clearInterval(portalStretchInterval);
+    closeMangaModal();
 };
 
 // ==========================================
