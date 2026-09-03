@@ -1,5 +1,7 @@
 // CORE CONNECT Academy - Student Portal Logic
 
+let academySessionMemory = null;
+
 document.addEventListener('DOMContentLoaded', () => {
     checkAcademySession();
     setupTabListeners();
@@ -7,60 +9,105 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // 1. Session & Authentication Management
+function getSavedSession() {
+    if (academySessionMemory) return academySessionMemory;
+    try {
+        const raw = localStorage.getItem('academy_session');
+        if (raw) return JSON.parse(raw);
+    } catch (e) {
+        console.warn('localStorage read error:', e);
+    }
+    return null;
+}
+
+function saveSession(session) {
+    academySessionMemory = session;
+    try {
+        localStorage.setItem('academy_session', JSON.stringify(session));
+    } catch (e) {
+        console.warn('localStorage write error:', e);
+    }
+}
+
 function checkAcademySession() {
-    const session = JSON.parse(localStorage.getItem('academy_session'));
+    const session = getSavedSession();
     const loginSection = document.getElementById('loginSection');
     const portalSection = document.getElementById('portalSection');
     
     if (session) {
         // Logged in
-        if (loginSection) loginSection.style.display = 'none';
-        if (portalSection) portalSection.style.display = 'block';
+        if (loginSection) {
+            loginSection.style.display = 'none';
+            loginSection.setAttribute('style', 'display: none !important;');
+        }
+        if (portalSection) {
+            portalSection.style.display = 'block';
+            portalSection.setAttribute('style', 'display: block !important;');
+        }
         
         // Update header & badges
-        const schoolEl = document.getElementById('displaySchool');
-        const deptEl = document.getElementById('displayDept');
-        const nameEl = document.getElementById('displayName');
-        const studentIdEl = document.getElementById('displayStudentId');
+        try {
+            const schoolEl = document.getElementById('displaySchool');
+            const deptEl = document.getElementById('displayDept');
+            const nameEl = document.getElementById('displayName');
+            const studentIdEl = document.getElementById('displayStudentId');
+            
+            if (schoolEl) schoolEl.innerText = session.schoolName || '桜ヶ丘高等学校';
+            if (deptEl) deptEl.innerText = `${session.grade || '高校2年生'} ${session.club ? '・' + session.club : ''}`;
+            if (nameEl) nameEl.innerText = `${session.studentName || '佐藤 陽菜'} さん`;
+            if (studentIdEl) studentIdEl.innerText = session.studentId || 'HS-2026-084';
+        } catch (e) {
+            console.error('Header update error:', e);
+        }
         
-        if (schoolEl) schoolEl.innerText = session.schoolName;
-        if (deptEl) deptEl.innerText = `${session.grade} ${session.club ? '・' + session.club : ''}`;
-        if (nameEl) nameEl.innerText = `${session.studentName} さん`;
-        if (studentIdEl) studentIdEl.innerText = session.studentId;
-        
-        // Render Dashboard components
-        renderConditionSummary();
-        renderHrvTrendChart();
-        loadAcademyArticles();
+        // Render Dashboard components with individual error boundaries
+        try { renderConditionSummary(); } catch(e) { console.error('renderConditionSummary error:', e); }
+        try { renderHrvTrendChart(); } catch(e) { console.error('renderHrvTrendChart error:', e); }
+        try { loadAcademyArticles(); } catch(e) { console.error('loadAcademyArticles error:', e); }
     } else {
         // Logged out
-        if (loginSection) loginSection.style.display = 'flex';
-        if (portalSection) portalSection.style.display = 'none';
+        if (loginSection) {
+            loginSection.style.display = 'flex';
+            loginSection.setAttribute('style', 'display: flex !important;');
+        }
+        if (portalSection) {
+            portalSection.style.display = 'none';
+            portalSection.setAttribute('style', 'display: none !important;');
+        }
     }
 }
 
 window.handleAcademyLogin = function(event) {
-    if (event) event.preventDefault();
-    const schoolCode = document.getElementById('schoolCode').value.trim();
-    const schoolName = document.getElementById('schoolName').value.trim();
-    const studentId = document.getElementById('studentId').value.trim();
-    const studentName = document.getElementById('studentName').value.trim();
-    const grade = document.getElementById('studentGrade').value;
-    const club = document.getElementById('studentClub').value;
-    
-    if (studentId && studentName) {
-        const session = { schoolCode, schoolName, studentId, studentName, grade, club };
-        localStorage.setItem('academy_session', JSON.stringify(session));
-        
-        // Seed mock history if empty
-        seedMockHistoryIfEmpty(grade);
-        
-        checkAcademySession();
+    if (event) {
+        event.preventDefault();
+        event.stopPropagation();
     }
+    const schoolCode = (document.getElementById('schoolCode')?.value || 'ACAD-HS-01').trim();
+    const schoolName = (document.getElementById('schoolName')?.value || '桜ヶ丘高等学校').trim();
+    const studentId = (document.getElementById('studentId')?.value || 'HS-2026-084').trim();
+    const studentName = (document.getElementById('studentName')?.value || '佐藤 陽菜').trim();
+    const grade = document.getElementById('studentGrade')?.value || '高校2年生 (理系特進)';
+    const club = (document.getElementById('studentClub')?.value || '').trim();
+    
+    const session = { schoolCode, schoolName, studentId, studentName, grade, club };
+    saveSession(session);
+    
+    // Seed mock history if empty
+    try {
+        seedMockHistoryIfEmpty(grade);
+    } catch(e) {
+        console.warn('Seed mock error:', e);
+    }
+    
+    checkAcademySession();
+    return false;
 };
 
 window.handleAcademyLogout = function() {
-    localStorage.removeItem('academy_session');
+    academySessionMemory = null;
+    try {
+        localStorage.removeItem('academy_session');
+    } catch(e) {}
     location.reload();
 };
 

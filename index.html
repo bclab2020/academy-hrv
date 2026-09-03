@@ -399,7 +399,7 @@
                 <button type="button" class="preset-btn" onclick="applyPreset('athlete')">🏃 学生アスリート</button>
             </div>
 
-            <form id="academyLoginForm" onsubmit="handleAcademyLogin(event)">
+            <form id="academyLoginForm" onsubmit="handleAcademyLogin(event); return false;">
                 <div class="form-group">
                     <label for="schoolCode">学校・教育機関コード</label>
                     <input type="text" id="schoolCode" class="form-input" required value="ACAD-HS-01" placeholder="例: ACAD-HS-01">
@@ -432,7 +432,7 @@
                     <label for="studentClub">所属部活動 / サークル（任意）</label>
                     <input type="text" id="studentClub" class="form-input" value="吹奏楽部" placeholder="例: 陸上部, サッカー部, 軽音サークル, なし">
                 </div>
-                <button type="submit" class="login-btn">アカデミーにログイン</button>
+                <button type="button" class="login-btn" onclick="handleAcademyLogin(event)">アカデミーにログイン</button>
             </form>
         </div>
     </div>
@@ -1027,6 +1027,29 @@
         function closeLogicModal() {
             const modal = document.getElementById('logicModal');
             if (modal) modal.classList.remove('active');
+        }
+
+        // Failsafe auto-trigger if portal.js didn't execute
+        if (typeof window.handleAcademyLogin !== 'function') {
+            window.handleAcademyLogin = function(e) {
+                if (e) { e.preventDefault(); e.stopPropagation(); }
+                const sName = document.getElementById('studentName')?.value || '佐藤 陽菜';
+                const sGrade = document.getElementById('studentGrade')?.value || '高校2年生';
+                const sSchool = document.getElementById('schoolName')?.value || '桜ヶ丘高等学校';
+                const sId = document.getElementById('studentId')?.value || 'HS-2026-084';
+                
+                try {
+                    localStorage.setItem('academy_session', JSON.stringify({
+                        schoolName: sSchool, studentName: sName, grade: sGrade, studentId: sId
+                    }));
+                } catch(err){}
+                
+                const loginSec = document.getElementById('loginSection');
+                const portalSec = document.getElementById('portalSection');
+                if (loginSec) loginSec.setAttribute('style', 'display: none !important;');
+                if (portalSec) portalSec.setAttribute('style', 'display: block !important;');
+                return false;
+            };
         }
     </script>
 </body>
