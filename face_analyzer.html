@@ -1376,11 +1376,23 @@
             }
         }
 
-        // Camera Activation
+        // Camera Activation Engine (Exact robust implementation from B2B production version)
+        let cameraHelper = null;
+        let activeMediaStream = null;
+
         async function toggleCamera() {
             if (isCameraActive) {
+                // Stop camera
+                if (cameraHelper) {
+                    try { cameraHelper.stop(); } catch(e){}
+                    cameraHelper = null;
+                }
+                if (activeMediaStream) {
+                    try { activeMediaStream.getTracks().forEach(t => t.stop()); } catch(e){}
+                    activeMediaStream = null;
+                }
                 if (video.srcObject) {
-                    video.srcObject.getTracks().forEach(t => t.stop());
+                    try { video.srcObject.getTracks().forEach(t => t.stop()); } catch(e){}
                     video.srcObject = null;
                 }
                 isCameraActive = false;
@@ -1394,18 +1406,14 @@
                 return;
             }
 
+            statusBar.innerText = 'カメラとAI FaceMeshを初期化しています...';
+
+            // 1. Initialize MediaPipe FaceMesh
             try {
-                statusBar.innerText = 'カメラとAI FaceMeshを初期化しています...';
-                const stream = await navigator.mediaDevices.getUserMedia({
-                    video: { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: 'user' }
-                });
-                video.srcObject = stream;
-                await video.play();
+                if (typeof FaceMesh === 'undefined') {
+                    throw new Error("MediaPipe FaceMesh library not loaded from CDN.");
+                }
 
-                canvas.width = video.videoWidth || 640;
-                canvas.height = video.videoHeight || 480;
-
-                // Initialize MediaPipe FaceMesh
                 faceMesh = new FaceMesh({
                     locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`
                 });
@@ -1413,31 +1421,77 @@
                 faceMesh.setOptions({
                     maxNumFaces: 1,
                     refineLandmarks: true,
-                    minDetectionConfidence: 0.45,
-                    minTrackingConfidence: 0.45
+                    minDetectionConfidence: 0.5,
+                    minTrackingConfidence: 0.5
                 });
 
                 faceMesh.onResults(onFaceMeshResults);
+            } catch (initErr) {
+                console.error("MediaPipe FaceMesh initialization error:", initErr);
+                statusBar.innerText = 'AI FaceMeshの初期化に失敗しました。インターネット接続またはCDNをご確認ください。';
+                return;
+            }
 
-                camera = new Camera(video, {
-                    onFrame: async () => {
-                        if (isCameraActive) {
-                            await faceMesh.send({ image: video });
-                        }
-                    },
-                    width: 640,
-                    height: 480
+            // 2. Check browser support for MediaDevices
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                console.warn("navigator.mediaDevices.getUserMedia is not supported on this browser/environment.");
+                statusBar.innerText = 'お使いのブラウザまたは環境ではカメラ接続がサポートされていません。';
+                return;
+            }
+
+            // 3. Access WebCam
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: 'user' },
+                    audio: false
                 });
-                camera.start();
+                activeMediaStream = stream;
 
-                isCameraActive = true;
-                startCamBtn.innerText = '⏹ カメラ停止';
-                startScanBtn.disabled = false;
-                hudStatusText.innerText = '顔を検出中...';
-                statusBar.innerText = 'お顔が検出されました。「30秒スキャン開始」を押して測定を始めてください。';
+                function onMetadataLoaded() {
+                    if (isCameraActive) return; // Prevent duplicate initialization
+                    try {
+                        isCameraActive = true;
+                        startCamBtn.innerText = '⏹ カメラ停止';
+                        startScanBtn.disabled = false;
+                        hudStatusText.innerText = 'お顔を検出中...';
+                        statusBar.innerText = 'カメラが起動しました。お顔を枠に合わせて「30秒スキャン開始」を押してください。';
+
+                        canvas.width = video.videoWidth || 640;
+                        canvas.height = video.videoHeight || 480;
+
+                        // Create MediaPipe camera helper instance
+                        cameraHelper = new Camera(video, {
+                            onFrame: async () => {
+                                if (isCameraActive && faceMesh) {
+                                    try {
+                                        await faceMesh.send({ image: video });
+                                    } catch (sendErr) {
+                                        console.error("FaceMesh send error:", sendErr);
+                                    }
+                                }
+                            },
+                            width: 640,
+                            height: 480
+                        });
+                        cameraHelper.start();
+                    } catch (camErr) {
+                        console.error("Camera helper startup error:", camErr);
+                        statusBar.innerText = 'カメラ映像の描画に失敗しました。';
+                    }
+                }
+
+                // Register metadata listener first
+                video.addEventListener('loadedmetadata', onMetadataLoaded, { once: true });
+                video.srcObject = stream;
+                video.play().catch(e => console.warn('video.play() warning:', e));
+
+                // Fallback in case loadedmetadata already fired
+                if (video.readyState >= 1) {
+                    onMetadataLoaded();
+                }
             } catch (err) {
                 console.error("Camera access failed:", err);
-                statusBar.innerText = 'カメラの起動に失敗しました。右下の「デモ計測」をお試しください。';
+                statusBar.innerText = `カメラの起動に失敗しました (${err.name || err.message})。ブラウザのカメラ許可をご確認ください。`;
             }
         }
 
@@ -2221,12 +2275,6 @@
                 </div>
             `;
 
-            const actionBtn = document.getElementById('mangaActionBtn');
-            if (actionBtn) {
-                actionBtn.innerText = data.actionBtnText;
-                actionBtn.onclick = () => {
-                    startMangaInlineTimer(category);
-                };
             const actionBtn = document.getElementById('mangaActionBtn');
             if (actionBtn) {
                 actionBtn.innerText = data.actionBtnText;
